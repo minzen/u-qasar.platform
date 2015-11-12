@@ -42,7 +42,7 @@ The project can then be deployed on a JBoss-Server
 
 ## Database
 
-* The platform requires a database. As of default an in-memory H2 database is used.	One can alternatively use a file based H2 database or a MySQL database. 
+* The platform requires a database. As of default an in-memory H2 database is used. One can alternatively use a file based H2 database or a MySQL database. 
 * The DB configuration shall be provided in the included file `default.properties`. 
 * The instructions for configuring the platform to use MySQL are provided in the file README_MySQL.
 
