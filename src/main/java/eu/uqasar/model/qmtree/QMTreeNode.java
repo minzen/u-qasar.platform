@@ -42,9 +42,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.annotate.JsonBackReference;
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonManagedReference;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.annotate.JsonTypeInfo.As;
 import org.hibernate.search.annotations.Analyze;
@@ -96,14 +94,14 @@ public class QMTreeNode extends
 
 	@XmlTransient
 	@ManyToOne(cascade = CascadeType.ALL)
-	@JsonBackReference("parent")
+//	@JsonBackReference("parent")
 	protected QMTreeNode parent;
 
 	@XmlElement
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name="parent_id")
 	@OrderColumn
-	@JsonManagedReference("parent")
+//	@JsonManagedReference("parent")
 	@IndexedEmbedded(depth = 3)
 	protected List<QMTreeNode> children = new LinkedList<>();
 	
@@ -296,7 +294,7 @@ public class QMTreeNode extends
 
 	
 	@SuppressWarnings("ReturnOfCollectionOrArrayField")
-	@JsonManagedReference("parent")
+//	@JsonManagedReference("parent")
 	@Override
 	public LinkedList<QMTreeNode> getChildren() {
 		if (children instanceof LinkedList) {
@@ -307,7 +305,7 @@ public class QMTreeNode extends
 	}
 
 	@JsonIgnore
-	@JsonManagedReference("parent")
+//	@JsonManagedReference("parent")
 	public void setChildren(List<QMTreeNode> children) {
 		if (children instanceof LinkedList) {
 			this.children = children;
@@ -329,7 +327,7 @@ public class QMTreeNode extends
 	}
 
 	@XmlTransient
-	@JsonBackReference("parent")
+//	@JsonBackReference("parent")
 	@Override
 	public QMTreeNode getParent() {
 		return parent;
@@ -337,7 +335,7 @@ public class QMTreeNode extends
 
 	
 	@JsonIgnore
-	@JsonBackReference("parent")
+//	@JsonBackReference("parent")
 	public void setParent(QMTreeNode parent) {
 		this.parent = parent;
 		this.parent.children.add(this);

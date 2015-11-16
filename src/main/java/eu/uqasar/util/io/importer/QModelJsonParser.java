@@ -48,8 +48,8 @@ public class QModelJsonParser {
         ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(DeserializationConfig.Feature.AUTO_DETECT_CREATORS,true);
 		mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		mapper.configure(DeserializationConfig.Feature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
-		mapper.configure(DeserializationConfig.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+//		mapper.configure(DeserializationConfig.Feature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+//		mapper.configure(DeserializationConfig.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 		mapper.configure(DeserializationConfig.Feature.USE_GETTERS_AS_SETTERS, false);
 		
 		qm = mapper.readValue(file, QModel.class);

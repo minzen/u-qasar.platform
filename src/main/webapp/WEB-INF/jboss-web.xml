@@ -21,5 +21,5 @@
 
 <jboss-web>
   <context-root>/${app.context.root}</context-root>
-  <security-domain>java:/jaas/other</security-domain>
+  <security-domain>other</security-domain>
 </jboss-web>

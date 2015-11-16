@@ -46,7 +46,7 @@ public class QProjectJsonWriter extends QProjectWriter {
 		mapper.configure(SerializationConfig.Feature.USE_ANNOTATIONS, true);
 		mapper.configure(SerializationConfig.Feature.AUTO_DETECT_GETTERS, true);
 
-		mapper.enable(SerializationConfig.Feature.INDENT_OUTPUT);
+//		mapper.enable(SerializationConfig.Feature.INDENT_OUTPUT);
 
 		file =  new File(p.getName()+".json");
 		// write JSON to a file

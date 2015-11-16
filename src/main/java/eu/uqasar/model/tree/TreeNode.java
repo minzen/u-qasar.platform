@@ -43,9 +43,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.annotate.JsonBackReference;
 import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonManagedReference;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.annotate.JsonTypeInfo.As;
 import org.hibernate.search.annotations.Analyze;
@@ -101,7 +99,7 @@ public class TreeNode extends
     @XmlTransient
     @ManyToOne(cascade = CascadeType.ALL)
     @IndexedEmbedded(depth = 3)
-    @JsonBackReference("parent")
+//    @JsonBackReference("parent")
 	protected TreeNode parent;
 
 	// Set the type of the suggestion and the belonging value, but do not store 
@@ -116,7 +114,7 @@ public class TreeNode extends
 	@OneToMany(cascade = CascadeType.ALL)
 	@JoinColumn(name="parent_id")
 	@OrderColumn
-	@JsonManagedReference("parent")
+//	@JsonManagedReference("parent")
 	@IndexedEmbedded(depth = 3)
 	protected List<TreeNode> children = new LinkedList<>();
 	
@@ -322,7 +320,7 @@ public class TreeNode extends
 	}
 
 	@SuppressWarnings("ReturnOfCollectionOrArrayField")
-	@JsonManagedReference("parent")
+//	@JsonManagedReference("parent")
 	@Override
 	public LinkedList<TreeNode> getChildren() {
 		if (children instanceof LinkedList) {
@@ -333,7 +331,7 @@ public class TreeNode extends
 	}
 
 	@JsonIgnore
-	@JsonManagedReference("parent")
+//	@JsonManagedReference("parent")
 	public void setChildren(List<TreeNode> children) {
 		if (children instanceof LinkedList) {
 			this.children = children;
@@ -353,14 +351,14 @@ public class TreeNode extends
 	}
 
 	@XmlTransient
-	@JsonBackReference("parent")
+//	@JsonBackReference("parent")
 	@Override
 	public TreeNode getParent() {
 		return parent;
 	}
 
 	@JsonIgnore
-	@JsonBackReference("parent")
+//	@JsonBackReference("parent")
 	public void setParent(TreeNode parent) {
 		this.parent = parent;
 		this.parent.children.add(this);
