@@ -47,6 +47,7 @@ import eu.uqasar.model.measure.CubesMetricMeasurement;
 import eu.uqasar.model.measure.GitlabMetricMeasurement;
 import eu.uqasar.model.measure.JenkinsMetricMeasurement;
 import eu.uqasar.model.measure.JiraMetricMeasurement;
+import eu.uqasar.model.measure.MetricMeasurement;
 import eu.uqasar.model.measure.MetricSource;
 import eu.uqasar.model.measure.SonarMetricMeasurement;
 import eu.uqasar.model.measure.TestLinkMetricMeasurement;
@@ -55,6 +56,7 @@ import eu.uqasar.service.dataadapter.CubesDataService;
 import eu.uqasar.service.dataadapter.GitlabDataService;
 import eu.uqasar.service.dataadapter.JenkinsDataService;
 import eu.uqasar.service.dataadapter.JiraDataService;
+import eu.uqasar.service.dataadapter.MetricDataService;
 import eu.uqasar.service.dataadapter.SonarDataService;
 import eu.uqasar.service.dataadapter.TestLinkDataService;
 import eu.uqasar.util.UQasarUtil;
@@ -81,6 +83,9 @@ public class AdapterSettings extends AbstractEntity {
     private String adapterProject;
     private String adapterTestPlan;
 
+    
+	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
+    private List<MetricMeasurement> measurements = new ArrayList<>();
 	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
     private List<SonarMetricMeasurement> sonarMeasurements = new ArrayList<>();
 	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
@@ -237,6 +242,14 @@ public class AdapterSettings extends AbstractEntity {
     }
 
     
+	public List<MetricMeasurement> getMeasurements() {
+		return measurements;
+	}
+
+	public void setMeasurements(List<MetricMeasurement> measurements) {
+		this.measurements = measurements;
+	}
+
 	public List<SonarMetricMeasurement> getSonarMeasurements() {
 		return sonarMeasurements;
 	}
@@ -295,36 +308,40 @@ public class AdapterSettings extends AbstractEntity {
         logger.debug("AdapterSettings::updateAdapterData()");
         try {
             InitialContext ic = new InitialContext();
-            if (getMetricSource() != null
-                && getMetricSource() == MetricSource.IssueTracker) {
-                JiraDataService jiraDataService =
-                    (JiraDataService) ic.lookup("java:module/JiraDataService");
-                jiraDataService.updateAdapterData(this);
-            } else if (getMetricSource() != null
-                && getMetricSource() == MetricSource.TestingFramework) {
-                TestLinkDataService testLinkDataService =
-                    (TestLinkDataService) ic.lookup("java:module/TestLinkDataService");
-                testLinkDataService.updateAdapterData(this);
-            } else if (getMetricSource() != null
-                && getMetricSource() == MetricSource.StaticAnalysis) {
-                SonarDataService sonarDataService =
-                    (SonarDataService) ic.lookup("java:module/SonarDataService");
-                sonarDataService.updateAdapterData(this);
-            } else if (getMetricSource() != null 
-            	&& getMetricSource() == MetricSource.CubeAnalysis){
-                CubesDataService cubesDataService =
-                        (CubesDataService) ic.lookup("java:module/CubesDataService");
-                    cubesDataService.updateAdapterData(this);
-            } else if (getMetricSource() != null 
-            		&& getMetricSource() == MetricSource.VersionControl) {
-            	GitlabDataService gitlabDataService = 
-            			(GitlabDataService) ic.lookup("java:module/GitlabDataService");
-            	gitlabDataService.updateAdapterData(this);
-            } else if (getMetricSource() != null 
-            		&& getMetricSource() == MetricSource.ContinuousIntegration) {
-            	JenkinsDataService jenkinsDataService = (JenkinsDataService) ic.lookup("java:module/JenkinsDataService");
-            	jenkinsDataService.updateAdapterData(this);
-            }
+            
+            MetricDataService dataService = (MetricDataService) ic.lookup("java:module/MetricDataService");
+            dataService.updateAdapterData(this);            
+            
+//            if (getMetricSource() != null
+//                && getMetricSource() == MetricSource.IssueTracker) {
+//                JiraDataService jiraDataService =
+//                    (JiraDataService) ic.lookup("java:module/JiraDataService");
+//                jiraDataService.updateAdapterData(this);
+//            } else if (getMetricSource() != null
+//                && getMetricSource() == MetricSource.TestingFramework) {
+//                TestLinkDataService testLinkDataService =
+//                    (TestLinkDataService) ic.lookup("java:module/TestLinkDataService");
+//                testLinkDataService.updateAdapterData(this);
+//            } else if (getMetricSource() != null
+//                && getMetricSource() == MetricSource.StaticAnalysis) {
+//                SonarDataService sonarDataService =
+//                    (SonarDataService) ic.lookup("java:module/SonarDataService");
+//                sonarDataService.updateAdapterData(this);
+//            } else if (getMetricSource() != null 
+//            	&& getMetricSource() == MetricSource.CubeAnalysis){
+//                CubesDataService cubesDataService =
+//                        (CubesDataService) ic.lookup("java:module/CubesDataService");
+//                    cubesDataService.updateAdapterData(this);
+//            } else if (getMetricSource() != null 
+//            		&& getMetricSource() == MetricSource.VersionControl) {
+//            	GitlabDataService gitlabDataService = 
+//            			(GitlabDataService) ic.lookup("java:module/GitlabDataService");
+//            	gitlabDataService.updateAdapterData(this);
+//            } else if (getMetricSource() != null 
+//            		&& getMetricSource() == MetricSource.ContinuousIntegration) {
+//            	JenkinsDataService jenkinsDataService = (JenkinsDataService) ic.lookup("java:module/JenkinsDataService");
+//            	jenkinsDataService.updateAdapterData(this);
+//            }
 
             // Update the project tree
             UQasarUtil.updateTree(this.getProject());

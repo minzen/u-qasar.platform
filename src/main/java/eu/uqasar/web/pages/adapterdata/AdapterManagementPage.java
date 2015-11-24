@@ -171,40 +171,42 @@ public class AdapterManagementPage extends BasePage {
 					}
 				});
 
-				// add button to show AddEditPage
+				// add button to show Add / EditPage for adapter 
 				item.add(new BookmarkablePageLink<AdapterAddEditPage>(
 						"edit", AdapterAddEditPage.class,
 						forAdapter(adapterSettings)));
 
 				// Depending on the adapter type add a link to the page 
 				// where the adapter data can be managed.
-                if (adapterSettings.getMetricSource() == MetricSource.IssueTracker) {
-                    item.add(new BookmarkablePageLink<IssueTrackerDataManagementPage>(
-                        "manage", IssueTrackerDataManagementPage.class, 
-                        forAdapter(adapterSettings)));
-                } else if (adapterSettings.getMetricSource() == MetricSource.StaticAnalysis){
-                    item.add(new BookmarkablePageLink<StaticAnalysisDataManagementPage>(
-                        "manage", StaticAnalysisDataManagementPage.class, 
-                        forAdapter(adapterSettings)));
-                } else if (adapterSettings.getMetricSource() == MetricSource.TestingFramework) {
-                    item.add(new BookmarkablePageLink<TestFrameworkDataManagementPage>(
-                    	"manage", TestFrameworkDataManagementPage.class, forAdapter(adapterSettings)));                    
-                } else if (adapterSettings.getMetricSource() == MetricSource.CubeAnalysis) {
-                	item.add(new BookmarkablePageLink<CubeAnalysisDataManagementPage>(
-                    	"manage", CubeAnalysisDataManagementPage.class, 
-                    	forAdapter(adapterSettings)));
-                } else if (adapterSettings.getMetricSource() == MetricSource.VersionControl) {
-                	item.add(new BookmarkablePageLink<GitlabDataManagementPage>(
-                		"manage", GitlabDataManagementPage.class, 
-                		forAdapter(adapterSettings)));
-                } else if (adapterSettings.getMetricSource() == MetricSource.ContinuousIntegration) {
-                	item.add(new BookmarkablePageLink<JenkinsDataManagementPage>(
-                    		"manage", JenkinsDataManagementPage.class, 
-                    		forAdapter(adapterSettings)));                	
-                	
-                } else {
-                    item.add(new WebMarkupContainer("manage").setVisible(false));
-                }
+				item.add(new BookmarkablePageLink<AdapterDataManagementPage>("manage", 
+						AdapterDataManagementPage.class, forAdapter(adapterSettings)));
+				
+//                if (adapterSettings.getMetricSource() == MetricSource.IssueTracker) {
+//                    item.add(new BookmarkablePageLink<IssueTrackerDataManagementPage>(
+//                        "manage", IssueTrackerDataManagementPage.class, 
+//                        forAdapter(adapterSettings)));
+//                } else if (adapterSettings.getMetricSource() == MetricSource.StaticAnalysis){
+//                    item.add(new BookmarkablePageLink<StaticAnalysisDataManagementPage>(
+//                        "manage", StaticAnalysisDataManagementPage.class, 
+//                        forAdapter(adapterSettings)));
+//                } else if (adapterSettings.getMetricSource() == MetricSource.TestingFramework) {
+//                    item.add(new BookmarkablePageLink<TestFrameworkDataManagementPage>(
+//                    	"manage", TestFrameworkDataManagementPage.class, forAdapter(adapterSettings)));                    
+//                } else if (adapterSettings.getMetricSource() == MetricSource.CubeAnalysis) {
+//                	item.add(new BookmarkablePageLink<CubeAnalysisDataManagementPage>(
+//                    	"manage", CubeAnalysisDataManagementPage.class, 
+//                    	forAdapter(adapterSettings)));
+//                } else if (adapterSettings.getMetricSource() == MetricSource.VersionControl) {
+//                	item.add(new BookmarkablePageLink<GitlabDataManagementPage>(
+//                		"manage", GitlabDataManagementPage.class, 
+//                		forAdapter(adapterSettings)));
+//                } else if (adapterSettings.getMetricSource() == MetricSource.ContinuousIntegration) {
+//                	item.add(new BookmarkablePageLink<JenkinsDataManagementPage>(
+//                    		"manage", JenkinsDataManagementPage.class, 
+//                    		forAdapter(adapterSettings)));                	
+//                } else {
+//                    item.add(new WebMarkupContainer("manage").setVisible(false));
+//                }
 			}
 		};
 		// add list of adapters to container
@@ -467,20 +469,6 @@ public class AdapterManagementPage extends BasePage {
 				this, null).getString();
 		getPage().success(message);
 		updateFeedbackPanel(target);
-	}
-
-	/**
-	 * View message on the panel when the update is failed 
-	 * @param target
-	 */
-	private void viewUpdateFailed(AjaxRequestTarget target) {
-		// success message has to be associated to session so that it is shown
-		// in the global feedback panel
-		String message = new StringResourceModel("error.message",
-				this, null).getString();
-		getPage().error(message);
-		updateFeedbackPanel(target);
-
 	}
 
 
