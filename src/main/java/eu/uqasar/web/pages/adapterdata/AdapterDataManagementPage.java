@@ -65,10 +65,8 @@ import eu.uqasar.web.provider.EntityProvider;
 public class AdapterDataManagementPage extends BasePage {
 
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+
 	@Inject
 	private MetricDataService dataService;
 	@Inject 
@@ -88,16 +86,16 @@ public class AdapterDataManagementPage extends BasePage {
 	public AdapterDataManagementPage(final PageParameters parameters) {
 
 		super(parameters);
-		
+
 		Long adapterId = parameters.get("id").toLongObject();
-		
+
 		final Form<MetricMeasurement> deleteForm = new Form<>("deleteForm");
 		add(deleteForm);
 
-		// add checkgroup for selecting multiple products
+		// add checkgroup for selecting multiple items
 		deleteForm.add(dataGroup = newDataCheckGroup());
 
-		// add the container holding list of existing products
+		// add the container holding list of existing items
 		dataGroup.add(dataContainer.setOutputMarkupId(true));
 
 		dataContainer.add(new CheckGroupSelector(
@@ -106,27 +104,28 @@ public class AdapterDataManagementPage extends BasePage {
 		DataView<MetricMeasurement> measurements = new DataView<MetricMeasurement>(
 				"measurements", new DataProvider(adapterId), itemsPerPage) {
 
+			private static final long serialVersionUID = 1L;
 
-					@Override
-					protected void populateItem(final Item<MetricMeasurement> item) {
-						final MetricMeasurement metricMeasurement = item.getModelObject();
+			@Override
+			protected void populateItem(final Item<MetricMeasurement> item) {
+				final MetricMeasurement metricMeasurement = item.getModelObject();
 
-						item.add(new Check<>("dataCheck", item
-								.getModel(), dataGroup));
+				item.add(new Check<>("dataCheck", item
+						.getModel(), dataGroup));
 
-						item.add(new Label("name", new PropertyModel<String>(
-								metricMeasurement, "name")));
+				item.add(new Label("name", new PropertyModel<String>(
+						metricMeasurement, "name")));
 
-						item.add(new Label("metric", new PropertyModel<String>(
-								metricMeasurement, "metric")));
-						
-						item.add(new Label("value", new PropertyModel<String>(
-								metricMeasurement, "value")));
+				item.add(new Label("metric", new PropertyModel<String>(
+						metricMeasurement, "metric")));
 
-						item.add(new Label("timeStamp", new PropertyModel<Date>(
-								metricMeasurement, "timeStamp")));
-					}
-				};
+				item.add(new Label("value", new PropertyModel<String>(
+						metricMeasurement, "value")));
+
+				item.add(new Label("timeStamp", new PropertyModel<Date>(
+						metricMeasurement, "timeStamp")));
+			}
+		};
 		dataContainer.add(measurements);
 
 		// add links for table pagination
@@ -137,9 +136,9 @@ public class AdapterDataManagementPage extends BasePage {
 
 		// add button to delete selected items
 		dataContainer
-				.add(deleteSelectedButton = newDeleteSelectedButton(dataGroup));
+		.add(deleteSelectedButton = newDeleteSelectedButton(dataGroup));
 
-		// add confirmation modal for deleting products
+		// add confirmation modal for deleting items
 		add(deleteConfirmationModal = newDeleteConfirmationModal());
 	}
 
@@ -160,17 +159,19 @@ public class AdapterDataManagementPage extends BasePage {
 	private WebMarkupContainer newDataContainer() {
 		return new WebMarkupContainer("dataContainer") {
 
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				// add javascript to load tagsinput plugin
 				response.render(OnLoadHeaderItem.forScript(String.format(
 						JSTemplates.LOAD_TABLE_SORTER, "data-list")));
-			}
-		;
-	}
-
-	;
+			};
+		};
 	}
 
 	/**
@@ -197,19 +198,29 @@ public class AdapterDataManagementPage extends BasePage {
 
 	/**
 	 *
-	 * @param productGroup
+	 * @param dataGroup
 	 * @return
 	 */
 	private AjaxSubmitLink newDeleteSelectedButton(
 			final CheckGroup<MetricMeasurement> dataGroup) {
 		return new AjaxSubmitLink("deleteSelected") {
 
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				// only enabled if at least one Product is selected
+				// only enabled if at least one item is selected
 				if (dataGroup.getModelObject().isEmpty()) {
 					add(new CssClassNameAppender(Model.of("disabled")) {
+
+						/**
+						 * 
+						 */
+						private static final long serialVersionUID = 1L;
 
 						// remove css class when component is rendered again
 						@Override
@@ -229,7 +240,7 @@ public class AdapterDataManagementPage extends BasePage {
 			}
 		};
 	}
-	
+
 
 	/**
 	 *
@@ -239,35 +250,35 @@ public class AdapterDataManagementPage extends BasePage {
 		final NotificationModal notificationModal = new NotificationModal(
 				"deleteConfirmationModal", new StringResourceModel(
 						"delete.confirmation.modal.header", this, null),
-				new StringResourceModel("delete.confirmation.modal.message",
-						this, null), false);
+						new StringResourceModel("delete.confirmation.modal.message",
+								this, null), false);
 		notificationModal.addButton(new ModalActionButton(notificationModal,
 				Buttons.Type.Primary, new StringResourceModel(
 						"delete.confirmation.modal.submit.text", this, null),
-				true) {
-					private static final long serialVersionUID = -8579196626175159237L;
+						true) {
+			private static final long serialVersionUID = -8579196626175159237L;
 
-					@Override
-					protected void onAfterClick(AjaxRequestTarget target) {
-						// confirmed --> delete
-						deleteSelectedMeasurements(dataGroup.getModelObject(),
-								target);
-						// close modal
-						closeDeleteConfirmationModal(notificationModal, target);
-					}
-				});
+			@Override
+			protected void onAfterClick(AjaxRequestTarget target) {
+				// confirmed --> delete
+				deleteSelectedMeasurements(dataGroup.getModelObject(),
+						target);
+				// close modal
+				closeDeleteConfirmationModal(notificationModal, target);
+			}
+		});
 		notificationModal.addButton(new ModalActionButton(notificationModal,
 				Buttons.Type.Default, new StringResourceModel(
 						"delete.confirmation.modal.cancel.text", this, null),
-				true) {
-					private static final long serialVersionUID = 8931306355855637710L;
+						true) {
+			private static final long serialVersionUID = 8931306355855637710L;
 
-					@Override
-					protected void onAfterClick(AjaxRequestTarget target) {
-						// Cancel clicked --> do nothing, close modal
-						closeDeleteConfirmationModal(notificationModal, target);
-					}
-				});
+			@Override
+			protected void onAfterClick(AjaxRequestTarget target) {
+				// Cancel clicked --> do nothing, close modal
+				closeDeleteConfirmationModal(notificationModal, target);
+			}
+		});
 		return notificationModal;
 	}
 
@@ -326,7 +337,7 @@ public class AdapterDataManagementPage extends BasePage {
 
 	/**
 	 *
-	 * @param Product
+	 * @param MetricMeasurement
 	 * @return
 	 */
 	private static PageParameters forData(MetricMeasurement measurement) {
@@ -334,6 +345,11 @@ public class AdapterDataManagementPage extends BasePage {
 	}
 
 	private final class DataProvider extends EntityProvider<MetricMeasurement> {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 
 		private AdapterSettings adapter;
 

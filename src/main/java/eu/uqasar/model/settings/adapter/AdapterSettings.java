@@ -44,7 +44,7 @@ import org.jboss.solder.logging.Logger;
 import eu.uqasar.adapter.exception.uQasarException;
 import eu.uqasar.model.AbstractEntity;
 import eu.uqasar.model.measure.CubesMetricMeasurement;
-import eu.uqasar.model.measure.GitlabMetricMeasurement;
+//import eu.uqasar.model.measure.GitlabMetricMeasurement;
 import eu.uqasar.model.measure.JenkinsMetricMeasurement;
 import eu.uqasar.model.measure.JiraMetricMeasurement;
 import eu.uqasar.model.measure.MetricMeasurement;
@@ -52,13 +52,14 @@ import eu.uqasar.model.measure.MetricSource;
 import eu.uqasar.model.measure.SonarMetricMeasurement;
 import eu.uqasar.model.measure.TestLinkMetricMeasurement;
 import eu.uqasar.model.tree.Project;
-import eu.uqasar.service.dataadapter.CubesDataService;
-import eu.uqasar.service.dataadapter.GitlabDataService;
-import eu.uqasar.service.dataadapter.JenkinsDataService;
-import eu.uqasar.service.dataadapter.JiraDataService;
 import eu.uqasar.service.dataadapter.MetricDataService;
-import eu.uqasar.service.dataadapter.SonarDataService;
-import eu.uqasar.service.dataadapter.TestLinkDataService;
+//import eu.uqasar.service.dataadapter.CubesDataService;
+//import eu.uqasar.service.dataadapter.GitlabDataService;
+//import eu.uqasar.service.dataadapter.JenkinsDataService;
+//import eu.uqasar.service.dataadapter.JiraDataService;
+//import eu.uqasar.service.dataadapter.MetricDataService;
+//import eu.uqasar.service.dataadapter.SonarDataService;
+//import eu.uqasar.service.dataadapter.TestLinkDataService;
 import eu.uqasar.util.UQasarUtil;
 
 @Entity
@@ -86,18 +87,18 @@ public class AdapterSettings extends AbstractEntity {
     
 	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
     private List<MetricMeasurement> measurements = new ArrayList<>();
-	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
-    private List<SonarMetricMeasurement> sonarMeasurements = new ArrayList<>();
-	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
-    private List<JiraMetricMeasurement> jiraMeasurements = new ArrayList<>();
-	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
-    private List<CubesMetricMeasurement> cubesMeasurements = new ArrayList<>();
-	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
-    private List<JenkinsMetricMeasurement> jenkinsMeasurements = new ArrayList<>();
-	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
-    private List<TestLinkMetricMeasurement> testlinkMeasurements = new ArrayList<>();
-	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
-    private List<GitlabMetricMeasurement> gitlabMeasurements = new ArrayList<>();
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
+//    private List<SonarMetricMeasurement> sonarMeasurements = new ArrayList<>();
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
+//    private List<JiraMetricMeasurement> jiraMeasurements = new ArrayList<>();
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
+//    private List<CubesMetricMeasurement> cubesMeasurements = new ArrayList<>();
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
+//    private List<JenkinsMetricMeasurement> jenkinsMeasurements = new ArrayList<>();
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
+//    private List<TestLinkMetricMeasurement> testlinkMeasurements = new ArrayList<>();
+//	@OneToMany(cascade = CascadeType.ALL, mappedBy="adapter", orphanRemoval=true)
+//    private List<GitlabMetricMeasurement> gitlabMeasurements = new ArrayList<>();
 
 	
 	/**
@@ -250,56 +251,56 @@ public class AdapterSettings extends AbstractEntity {
 		this.measurements = measurements;
 	}
 
-	public List<SonarMetricMeasurement> getSonarMeasurements() {
-		return sonarMeasurements;
-	}
-
-	public void setSonarMeasurements(List<SonarMetricMeasurement> sonarMeasurements) {
-		this.sonarMeasurements = sonarMeasurements;
-	}
-
-	public List<JiraMetricMeasurement> getJiraMeasurements() {
-		return jiraMeasurements;
-	}
-
-	public void setJiraMeasurements(List<JiraMetricMeasurement> jiraMeasurements) {
-		this.jiraMeasurements = jiraMeasurements;
-	}
-
-	public List<CubesMetricMeasurement> getCubesMeasurements() {
-		return cubesMeasurements;
-	}
-
-	public void setCubesMeasurements(List<CubesMetricMeasurement> cubesMeasurements) {
-		this.cubesMeasurements = cubesMeasurements;
-	}
-
-	public List<JenkinsMetricMeasurement> getJenkinsMeasurements() {
-		return jenkinsMeasurements;
-	}
-
-	public void setJenkinsMeasurements(
-			List<JenkinsMetricMeasurement> jenkinsMeasurements) {
-		this.jenkinsMeasurements = jenkinsMeasurements;
-	}
-
-	public List<TestLinkMetricMeasurement> getTestlinkMeasurements() {
-		return testlinkMeasurements;
-	}
-
-	public void setTestlinkMeasurements(
-			List<TestLinkMetricMeasurement> testlinkMeasurements) {
-		this.testlinkMeasurements = testlinkMeasurements;
-	}
-
-	public List<GitlabMetricMeasurement> getGitlabMeasurements() {
-		return gitlabMeasurements;
-	}
-
-	public void setGitlabMeasurements(
-			List<GitlabMetricMeasurement> gitlabMeasurements) {
-		this.gitlabMeasurements = gitlabMeasurements;
-	}
+//	public List<SonarMetricMeasurement> getSonarMeasurements() {
+//		return sonarMeasurements;
+//	}
+//
+//	public void setSonarMeasurements(List<SonarMetricMeasurement> sonarMeasurements) {
+//		this.sonarMeasurements = sonarMeasurements;
+//	}
+//
+//	public List<JiraMetricMeasurement> getJiraMeasurements() {
+//		return jiraMeasurements;
+//	}
+//
+//	public void setJiraMeasurements(List<JiraMetricMeasurement> jiraMeasurements) {
+//		this.jiraMeasurements = jiraMeasurements;
+//	}
+//
+//	public List<CubesMetricMeasurement> getCubesMeasurements() {
+//		return cubesMeasurements;
+//	}
+//
+//	public void setCubesMeasurements(List<CubesMetricMeasurement> cubesMeasurements) {
+//		this.cubesMeasurements = cubesMeasurements;
+//	}
+//
+//	public List<JenkinsMetricMeasurement> getJenkinsMeasurements() {
+//		return jenkinsMeasurements;
+//	}
+//
+//	public void setJenkinsMeasurements(
+//			List<JenkinsMetricMeasurement> jenkinsMeasurements) {
+//		this.jenkinsMeasurements = jenkinsMeasurements;
+//	}
+//
+//	public List<TestLinkMetricMeasurement> getTestlinkMeasurements() {
+//		return testlinkMeasurements;
+//	}
+//
+//	public void setTestlinkMeasurements(
+//			List<TestLinkMetricMeasurement> testlinkMeasurements) {
+//		this.testlinkMeasurements = testlinkMeasurements;
+//	}
+//
+//	public List<GitlabMetricMeasurement> getGitlabMeasurements() {
+//		return gitlabMeasurements;
+//	}
+//
+//	public void setGitlabMeasurements(
+//			List<GitlabMetricMeasurement> gitlabMeasurements) {
+//		this.gitlabMeasurements = gitlabMeasurements;
+//	}
 
 	/**
 	 * Get a new snapshot of adapter data

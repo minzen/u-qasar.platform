@@ -42,7 +42,7 @@ import eu.uqasar.util.UQasarUtil;
 
 @Rule(name = "Project Quality Rule", description = "Checking the project overall quality")
 public class ProjectQualityRule extends BasicRule {
-	
+
 	private Logger logger = Logger.getLogger(ProjectQualityRule.class);
 	// Projects to be checked for conditions
 	private List<Project> projects = new ArrayList<>();
@@ -71,15 +71,16 @@ public class ProjectQualityRule extends BasicRule {
 	public boolean checkConditions() {
 		boolean alert = false;
 		// Check the target value for the projects; if one of the projects has a lower value than the specified one, return true
-		for (Project project : projects) {
-			logger.debug("Checking the conditions of the rule \"" +this.getName() +"\" for the project " +project);
-			// If one of the projects has a quality value below the targetvalue, the rules should be applied
-			if (project.getValue() < targetQualityValue) {
-				alert = true;
-				break;
+		if (projects != null && projects.size() > 0) {
+			for (Project project : projects) {
+				logger.debug("Checking the conditions of the rule \"" +this.getName() +"\" for the project " +project);
+				// If one of the projects has a quality value below the targetvalue, the rules should be applied
+				if (project.getValue() < targetQualityValue) {
+					alert = true;
+					break;
+				}
 			}
 		}
-
 		return alert;
 	}
 
@@ -99,7 +100,7 @@ public class ProjectQualityRule extends BasicRule {
 				// Create a new notification
 				BadSoftwareQualityNotification badSoftwareNotify = new BadSoftwareQualityNotification();	
 				badSoftwareNotify.setCreationDate(DateTime.now().toDate());
-//				badSoftwareNotify.setUser(UQasar.getSession().getLoggedInUser());	
+				//				badSoftwareNotify.setUser(UQasar.getSession().getLoggedInUser());	
 				badSoftwareNotify.setProject(project);
 				boolean addItem = true;
 				for (INotification notif : UQasarUtil.getNotifications()) {
@@ -115,7 +116,7 @@ public class ProjectQualityRule extends BasicRule {
 				}
 
 
-		        
+
 			} else {
 				logger.info("Project quality: " +project.getValue());
 			}

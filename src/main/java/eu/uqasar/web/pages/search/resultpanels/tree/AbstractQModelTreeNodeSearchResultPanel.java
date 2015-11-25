@@ -21,12 +21,12 @@ package eu.uqasar.web.pages.search.resultpanels.tree;
  */
 
 
+import javax.inject.Inject;
+
 import eu.uqasar.model.AbstractEntity;
 import eu.uqasar.service.AbstractService;
 import eu.uqasar.service.QMTreeNodeService;
-import eu.uqasar.service.tree.TreeNodeService;
 import eu.uqasar.web.pages.search.resultpanels.AbstractSearchResultsPanel;
-import javax.inject.Inject;
 
 /**
  *

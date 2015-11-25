@@ -42,6 +42,9 @@ public class MetricMeasurement extends AbstractEntity implements
 	@ManyToOne
 	private Project project;
 	private Date timeStamp;
+	// Extra content that is desired to be stored
+	@Lob
+	private String content;
 	
 	@Override
 	public String getName() {
@@ -104,13 +107,21 @@ public class MetricMeasurement extends AbstractEntity implements
 		this.timeStamp = ts;
 	}
 	
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
 	@Override
 	public String toString() {
 		return "MetricMeasurement [name=" +this.name
 				+", metric=" +this.metric  
 				+", value=" +this.value
-				+", adapter=" +this.adapter.getName()
-				+", project=" +this.project.getName()
+				+", adapter=" +this.adapter
+				+", project=" +this.project
 				+", timeStamp=" +this.timeStamp
 				+"]";
 	}

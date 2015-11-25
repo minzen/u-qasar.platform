@@ -77,7 +77,7 @@ public class AdapterSettingsService extends AbstractService<AdapterSettings> {
 
 	@Resource
 	private TimerService timerService;
-	
+
 	@Inject
 	private PlatformSettingsService platformSettingsService;
 
@@ -130,12 +130,12 @@ public class AdapterSettingsService extends AbstractService<AdapterSettings> {
 
 		adapterDataUpdateInterval = platformSettingsService.getValueByKey("adapterdata_update_interval");
 		System.out.println("adapterdata_update_interval: " +adapterDataUpdateInterval);
-		
+
 		// Attempt to read the value of update interval from the properties file
 		if (adapterDataUpdateInterval != null && !adapterDataUpdateInterval.isEmpty()) {
 			this.updateInterval = Integer.valueOf(adapterDataUpdateInterval);
 		}
-		
+
 		System.out.println("initAdapterDataTimer() [" + new Date() + "]");
 		// Cancel the existing timer if exists
 		cancelTimer();
@@ -178,52 +178,15 @@ public class AdapterSettingsService extends AbstractService<AdapterSettings> {
 		try {
 			InitialContext ic = new InitialContext();
 			AdapterSettingsService adapterSettingsService = (AdapterSettingsService) ic.lookup("java:module/AdapterSettingsService");
-
-			List<AdapterSettings> adapters = adapterSettingsService.getAll();
-			boolean updateTree = false;
-			Set<Project> projectsToUpdate = new HashSet<>();
-			for (AdapterSettings adapter : adapters) {
-				if (adapter != null) {            
-					if (adapter.getMetricSource() != null && adapter.getMetricSource() == MetricSource.IssueTracker) {
-						JiraDataService jiraDataService = (JiraDataService) ic.lookup("java:module/JiraDataService");
-						jiraDataService.updateAdapterData(adapter);
-						updateTree = true;
-						projectsToUpdate.add(adapter.getProject());
-					} else if (adapter.getMetricSource() != null && adapter.getMetricSource() == MetricSource.StaticAnalysis) {
-						SonarDataService sonarDataService = (SonarDataService) ic.lookup("java:module/SonarDataService");
-						sonarDataService.updateAdapterData(adapter);
-						updateTree = true;
-						projectsToUpdate.add(adapter.getProject());
-					} else if (adapter.getMetricSource() != null && adapter.getMetricSource() == MetricSource.TestingFramework) {
-						TestLinkDataService testLinkDataService = (TestLinkDataService) ic.lookup("java:module/TestLinkDataService");
-						testLinkDataService.updateAdapterData(adapter);
-						updateTree = true;
-						projectsToUpdate.add(adapter.getProject());
-					} else if (adapter.getMetricSource() != null && adapter.getMetricSource() == MetricSource.CubeAnalysis) {
-						CubesDataService cubesDataService = (CubesDataService) ic.lookup("java:module/CubesDataService");
-						cubesDataService.updateAdapterData(adapter);
-						updateTree = true;
-						projectsToUpdate.add(adapter.getProject());
-					} else if (adapter.getMetricSource() != null && adapter.getMetricSource() == MetricSource.ContinuousIntegration) {
-						JenkinsDataService jenkinsDataService = (JenkinsDataService) ic.lookup("java:module/JenkinsDataService");
-						jenkinsDataService.updateAdapterData(adapter);
-						updateTree = true;
-						projectsToUpdate.add(adapter.getProject());
-					}
+			MetricDataService metricDataService = (MetricDataService) ic.lookup("java:module/MetricDataService");
+			if (metricDataService != null) {
+				List<AdapterSettings> adapters = adapterSettingsService.getAll();
+				for (AdapterSettings adapter : adapters) {
+					metricDataService.updateAdapterData(adapter);
 				}
-			}
-
-			// Only update project tree for the projects whose adapters were used to fetch data updates 
-			if (updateTree) {
-				Iterator<Project> iterator = projectsToUpdate.iterator();
-			    while (iterator.hasNext()) {
-			    	Project projectToUpdate = iterator.next();
-		            // Update the project tree
-		            UQasarUtil.updateTree(projectToUpdate);
-			    }
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		} 
+		}
 	}
 }

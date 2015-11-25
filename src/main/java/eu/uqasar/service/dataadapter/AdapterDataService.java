@@ -31,6 +31,7 @@ import eu.uqasar.adapter.exception.uQasarException;
 import eu.uqasar.model.measure.CubesMetricMeasurement;
 import eu.uqasar.model.measure.JenkinsMetricMeasurement;
 import eu.uqasar.model.measure.JiraMetricMeasurement;
+import eu.uqasar.model.measure.MetricMeasurement;
 import eu.uqasar.model.measure.MetricSource;
 import eu.uqasar.model.measure.SonarMetricMeasurement;
 import eu.uqasar.model.measure.TestLinkMetricMeasurement;
@@ -50,20 +51,22 @@ public class AdapterDataService implements Serializable {
 	private TestLinkDataService testlinkDataService;
 	private SonarDataService sonarDataService;
 	private CubesDataService cubesDataService;
-	private GitlabDataService gitlabDataService;
+//	private GitlabDataService gitlabDataService;
 	private TreeNodeService treeNodeService;
 	private AdapterSettingsService adapterSettingsService;
 	private JenkinsDataService jenkinsDataService;
+	private MetricDataService metricDataService;
 
 	public AdapterDataService() {
 		try {
 			InitialContext ic = new InitialContext();
+			metricDataService = (MetricDataService) ic.lookup("java:module/MetricDataService");
 			sonarDataService = (SonarDataService) ic.lookup("java:module/SonarDataService");
 			testlinkDataService = (TestLinkDataService) ic.lookup("java:module/TestLinkDataService");
 			jiraDataService = (JiraDataService) ic.lookup("java:module/JiraDataService");
 			cubesDataService = (CubesDataService) ic.lookup("java:module/CubesDataService");
 			treeNodeService = (TreeNodeService) ic.lookup("java:module/TreeNodeService");
-			gitlabDataService = (GitlabDataService) ic.lookup("java:module/GitlabDataService");
+//			gitlabDataService = (GitlabDataService) ic.lookup("java:module/GitlabDataService");
 			adapterSettingsService = (AdapterSettingsService) ic.lookup("java:module/AdapterSettingsService");
 			jenkinsDataService = (JenkinsDataService) ic.lookup("java:module/JenkinsDataService");
 		} catch (NamingException e) {
@@ -84,6 +87,11 @@ public class AdapterDataService implements Serializable {
 		// The value to be stored
 		Float storedMetricValue = (float) 0;
 		
+		MetricMeasurement res = metricDataService.getLatestMeasurementByProjectAndMetric(project, metricType);
+		if (res != null) {
+			storedMetricValue = Float.valueOf(res.getValue());
+		} 
+/*		
 		// Handle the different cases of adapter types
 		if (metricSource != null && metricSource == MetricSource.IssueTracker) {
 			List<JiraMetricMeasurement> res = null;
@@ -133,7 +141,7 @@ public class AdapterDataService implements Serializable {
 			}
 			
 		}
-		
+*/		
 
 
 		return storedMetricValue;
