@@ -232,7 +232,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 		Predicate condition = cb.equal(root.get(MetricMeasurement_.name), 
 				project);
 		Predicate condition2 = cb.equal(root.get(
-				MetricMeasurement_.metric), metric);
+				MetricMeasurement_.metricType), metric);
 		Predicate condition3 = cb.and(condition, condition2);
 		query.where(condition3);
 		query.orderBy(cb.desc(root.get(MetricMeasurement_.timeStamp)));
@@ -305,6 +305,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 		// SonarQube Adapter
 		if (adapterSettings.getMetricSource().equals(MetricSource.StaticAnalysis)) {
 			
+			// If no connect to the server...
 			if (testConnectionToServer(boundSystemURL, 10000) == false) return;
 
 			adapter = new SonarAdapter();
@@ -354,9 +355,9 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 
 			// Iterate the metric names and fetch results for each of these
 			// create a persistent entity for each measurement 
-			for (String metric : metricNames) {
-				logger.info("Obtaining JIRA measurements for metric: "+metric);
-				List<Measurement> metricMeasurements = adapter.query(boundSystemURL, credentials, metric);
+			for (String metricType : metricNames) {
+				logger.info("Obtaining JIRA measurements for metric: "+metricType);
+				List<Measurement> metricMeasurements = adapter.query(boundSystemURL, credentials, metricType);
 				for (Measurement measurement : metricMeasurements) {
 					String json = measurement.getMeasurement();
 					System.out.println("JSON: " +json);
@@ -366,7 +367,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 					for (int i = 0; i < jiraMetricMeasurement.length; i++) {
 						// Add a timestamp and metric name to the object
 						jiraMetricMeasurement[i].setTimeStamp(snapshotTimeStamp);
-						jiraMetricMeasurement[i].setMetricType(metric);
+						jiraMetricMeasurement[i].setMetricType(metricType);
 						jiraMetricMeasurement[i].setProject(adapterSettings.getProject());
 						jiraMetricMeasurement[i].setAdapter(adapterSettings);
 
@@ -378,6 +379,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 							JSONResource res = resty.json(url);
 							us.monoid.json.JSONObject jobj = res.toObject();
 							jsonContent = jobj.toString();
+							System.out.println("JSON Content: " +jsonContent);
 							jiraMetricMeasurement[i].setContent(jsonContent);
 						} catch (IOException e) {
 							e.printStackTrace();
@@ -385,19 +387,20 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 							e.printStackTrace();
 						}
 
-						MetricMeasurement metricMeasurement = new MetricMeasurement();
-						metricMeasurement.setAdapter(jiraMetricMeasurement[i].getAdapter());
-						metricMeasurement.setContent(jiraMetricMeasurement[i].getContent());
-						metricMeasurement.setMetricSource(MetricSource.IssueTracker);
-						metricMeasurement.setMetricType(jiraMetricMeasurement[i].getMetricType());
-						metricMeasurement.setName(jiraMetricMeasurement[i].getName());
-						metricMeasurement.setProject(jiraMetricMeasurement[i].getProject());
-						metricMeasurement.setAdapter(jiraMetricMeasurement[i].getAdapter());
-						metricMeasurement.setTimeStamp(jiraMetricMeasurement[i].getTimeStamp());
-						metricMeasurement.setValue(jiraMetricMeasurement[i].getValue());
-						
-						// persist the measurement
-						create(metricMeasurement);
+						create(jiraMetricMeasurement[i]);
+
+//						MetricMeasurement metricMeasurement = new MetricMeasurement();
+//						metricMeasurement.setAdapter(jiraMetricMeasurement[i].getAdapter());
+//						metricMeasurement.setContent(jiraMetricMeasurement[i].getContent());
+//						metricMeasurement.setMetricSource(MetricSource.IssueTracker);
+//						metricMeasurement.setMetricType(jiraMetricMeasurement[i].getMetricType());
+//						metricMeasurement.setName(jiraMetricMeasurement[i].getName());
+//						metricMeasurement.setProject(jiraMetricMeasurement[i].getProject());
+//						metricMeasurement.setAdapter(jiraMetricMeasurement[i].getAdapter());
+//						metricMeasurement.setTimeStamp(jiraMetricMeasurement[i].getTimeStamp());
+//						metricMeasurement.setValue(jiraMetricMeasurement[i].getValue());						
+//						// persist the measurement
+//						create(metricMeasurement);
 					}
 				}
 			}
@@ -627,7 +630,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 		Predicate condition = cb.equal(root.get(MetricMeasurement_.name), 
 				project);
 		Predicate condition2 = cb.equal(root.get(
-				MetricMeasurement_.metric), metric);
+				MetricMeasurement_.metricType), metric);
 		Predicate condition3 = cb.and(condition, condition2);
 		query.where(condition3);
 		query.orderBy(cb.desc(root.get(MetricMeasurement_.timeStamp)));
@@ -690,7 +693,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 		CriteriaQuery<MetricMeasurement> query = 
 				cb.createQuery(MetricMeasurement.class);
 		Root<MetricMeasurement> root = query.from(MetricMeasurement.class);
-		Predicate condition = cb.equal(root.get(MetricMeasurement_.metric), MetricSource.TestingFramework);
+		Predicate condition = cb.equal(root.get(MetricMeasurement_.metricType), MetricSource.TestingFramework);
 		query.where(condition);		
 		List<MetricMeasurement> resultList = 
 				em.createQuery(query).getResultList();
@@ -813,7 +816,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 			CriteriaQuery<MetricMeasurement> query = cb.createQuery(MetricMeasurement.class);
 			Root<MetricMeasurement> root = query.from(MetricMeasurement.class);
 
-			Predicate condition1 = cb.equal(root.get(MetricMeasurement_.metric), metric);
+			Predicate condition1 = cb.equal(root.get(MetricMeasurement_.metricType), metric);
 			Predicate condition2 = cb.equal(root.get(MetricMeasurement_.project), project);
 
 			Date from = getDateForPeriod(period);		
@@ -846,7 +849,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 		CriteriaQuery<MetricMeasurement> query = cb.createQuery(MetricMeasurement.class);
 		Root<MetricMeasurement> root = query.from(MetricMeasurement.class);
 
-		Predicate condition1 = cb.equal(root.get(MetricMeasurement_.metric), metric);
+		Predicate condition1 = cb.equal(root.get(MetricMeasurement_.metricType), metric);
 		Predicate condition2 = cb.equal(root.get(MetricMeasurement_.project), project);
 
 
@@ -880,7 +883,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<MetricMeasurement> query = cb.createQuery(MetricMeasurement.class);
 		Root<MetricMeasurement> root = query.from(MetricMeasurement.class);
-		Predicate condition = cb.equal(root.get(MetricMeasurement_.metric), metric);
+		Predicate condition = cb.equal(root.get(MetricMeasurement_.metricType), metric);
 		Predicate condition2 = cb.equal(root.get(MetricMeasurement_.timeStamp), date);
 		Predicate condition3 = cb.and(condition, condition2);
 		query.where(condition3);
@@ -902,7 +905,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<MetricMeasurement> query = cb.createQuery(MetricMeasurement.class);
 		Root<MetricMeasurement> root = query.from(MetricMeasurement.class);
-		Predicate condition = cb.equal(root.get(MetricMeasurement_.metric), metric);
+		Predicate condition = cb.equal(root.get(MetricMeasurement_.metricType), metric);
 		Predicate condition2 = cb.equal(root.get(MetricMeasurement_.timeStamp), date);
 		Predicate condition3 = cb.and(condition, condition2);
 		query.where(condition3);
@@ -926,7 +929,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<MetricMeasurement> query = cb.createQuery(MetricMeasurement.class);
 		Root<MetricMeasurement> root = query.from(MetricMeasurement.class);
-		Predicate condition1 = cb.equal(root.get(MetricMeasurement_.metric), metric);
+		Predicate condition1 = cb.equal(root.get(MetricMeasurement_.metricType), metric);
 		Predicate condition2 = cb.equal(root.get(MetricMeasurement_.project), project);
 
 		Date from = getDateForPeriod(period);		
