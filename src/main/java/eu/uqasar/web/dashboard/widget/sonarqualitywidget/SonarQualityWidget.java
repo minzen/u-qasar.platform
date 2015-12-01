@@ -33,6 +33,10 @@ import javax.naming.NamingException;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 
+import ro.fortsoft.wicket.dashboard.AbstractWidget;
+import ro.fortsoft.wicket.dashboard.Widget;
+import ro.fortsoft.wicket.dashboard.web.WidgetView;
+
 import com.googlecode.wickedcharts.highcharts.options.ChartOptions;
 import com.googlecode.wickedcharts.highcharts.options.Options;
 import com.googlecode.wickedcharts.highcharts.options.SeriesType;
@@ -40,12 +44,9 @@ import com.googlecode.wickedcharts.highcharts.options.Title;
 import com.googlecode.wickedcharts.highcharts.options.series.Point;
 import com.googlecode.wickedcharts.highcharts.options.series.PointSeries;
 
-import eu.uqasar.model.measure.SonarMetricMeasurement;
+import eu.uqasar.model.measure.MetricMeasurement;
 import eu.uqasar.service.PlatformSettingsService;
-import eu.uqasar.service.dataadapter.SonarDataService;
-import ro.fortsoft.wicket.dashboard.AbstractWidget;
-import ro.fortsoft.wicket.dashboard.Widget;
-import ro.fortsoft.wicket.dashboard.web.WidgetView;
+import eu.uqasar.service.dataadapter.MetricDataService;
 
 /**
  * A sample widget fetching sample data from a Sonar instance. 
@@ -121,9 +122,9 @@ public class SonarQualityWidget extends AbstractWidget {
 	 * Get the measurements
 	 * @return
 	 */
-	public List<SonarMetricMeasurement> getMeasurements(String period) {
+	public List<MetricMeasurement> getMeasurements(String period) {
 
-		List<SonarMetricMeasurement> measurements = new ArrayList<SonarMetricMeasurement>();
+		List<MetricMeasurement> measurements = new ArrayList<MetricMeasurement>();
 
 		if (settings.get("project") != null) {
 			project = settings.get("project");
@@ -131,7 +132,7 @@ public class SonarQualityWidget extends AbstractWidget {
 		
 		try {
 			InitialContext ic = new InitialContext();
-			SonarDataService dataService = (SonarDataService) ic.lookup("java:module/SonarDataService");
+			MetricDataService dataService = (MetricDataService) ic.lookup("java:module/MetricDataService");
 			
 			Date latestSnapshotDate = dataService.getLatestDate();
 			if (latestSnapshotDate != null) {
@@ -153,7 +154,7 @@ public class SonarQualityWidget extends AbstractWidget {
 	 * @param 
 	 * @return
 	 */
-	public Options getChartOptions(List<SonarMetricMeasurement> metrics ){			
+	public Options getChartOptions(List<MetricMeasurement> metrics ){			
 			
 			String group;
 			if (settings.get("metric") == null) {
@@ -163,8 +164,8 @@ public class SonarQualityWidget extends AbstractWidget {
 			}
 			
 			// get latest
-			List<SonarMetricMeasurement> latestMetrics = getLatestMetricDataSet(metrics);
-			List<SonarMetricMeasurement> metricGroup = getMetricsForGroup(group, latestMetrics);
+			List<MetricMeasurement> latestMetrics = getLatestMetricDataSet(metrics);
+			List<MetricMeasurement> metricGroup = getMetricsForGroup(group, latestMetrics);
 		
 			Options options = new Options();
 			ChartOptions chartOptions =  new ChartOptions();
@@ -173,11 +174,11 @@ public class SonarQualityWidget extends AbstractWidget {
 			Title chartTitle = new Title(title + " of " + group + " Metrics");
 			options.setTitle(chartTitle);
 
-			for(SonarMetricMeasurement metric: metricGroup){				
+			for(MetricMeasurement metric: metricGroup){				
 				PointSeries series = new PointSeries();	
 				series.setType(seriesType);
-				series.addPoint(new Point(metric.getSonarMetric(), new Double(metric.getValue())));
-				series.setName(metric.getSonarMetric());
+				series.addPoint(new Point(metric.getMetricType(), new Double(metric.getValue())));
+				series.setName(metric.getMetricType());
 				options.addSeries(series);
 			}
 			options.setChartOptions(chartOptions);	
@@ -186,7 +187,7 @@ public class SonarQualityWidget extends AbstractWidget {
 	}
 	
 	
-    public Options getChartOptionsDifferently(List<SonarMetricMeasurement> metrics,String individualMetric) {
+    public Options getChartOptionsDifferently(List<MetricMeasurement> metrics,String individualMetric) {
 
         String group;
         if (settings.get("metric") == null) {
@@ -196,8 +197,8 @@ public class SonarQualityWidget extends AbstractWidget {
         }
 
         // get latest
-        //List<SonarMetricMeasurement> latestMetrics = getLatestMetricDataSet(metrics);
-       // List<SonarMetricMeasurement> metricGroup = getMetricsForGroup(group, latestMetrics);
+        //List<MetricMeasurement> latestMetrics = getLatestMetricDataSet(metrics);
+       // List<MetricMeasurement> metricGroup = getMetricsForGroup(group, latestMetrics);
 
         Options options = new Options();
         ChartOptions chartOptions = new ChartOptions();
@@ -206,13 +207,13 @@ public class SonarQualityWidget extends AbstractWidget {
         Title chartTitle = new Title(title + " of " + group + " Metrics");
         options.setTitle(chartTitle);
 
-        for (SonarMetricMeasurement metric : metrics) {
+        for (MetricMeasurement metric : metrics) {
             
-            if(metric.getSonarMetric().compareToIgnoreCase(individualMetric) == 0){
+            if(metric.getMetricType().compareToIgnoreCase(individualMetric) == 0){
             PointSeries series = new PointSeries();
             series.setType(seriesType);
-            series.addPoint(new Point(metric.getSonarMetric(), new Double(metric.getValue())));
-            series.setName(metric.getSonarMetric());
+            series.addPoint(new Point(metric.getMetricType(), new Double(metric.getValue())));
+            series.setName(metric.getMetricType());
             options.addSeries(series);
             }
         }
@@ -224,9 +225,9 @@ public class SonarQualityWidget extends AbstractWidget {
 	
 	
 
-	private List<SonarMetricMeasurement> getLatestMetricDataSet(List<SonarMetricMeasurement> metrics) {
+	private List<MetricMeasurement> getLatestMetricDataSet(List<MetricMeasurement> metrics) {
 		// incoming metrics are already sorted by timestamp descending (newest at beginning)
-		List<SonarMetricMeasurement> latestMetrics = new ArrayList<>();
+		List<MetricMeasurement> latestMetrics = new ArrayList<>();
 		if (metrics != null && !metrics.isEmpty()) {
 			for (int i = 0; i < metrics.size(); i++) {
 				latestMetrics.add(metrics.get(i));
@@ -235,9 +236,9 @@ public class SonarQualityWidget extends AbstractWidget {
 		return latestMetrics;
 	}
 
-	private List<SonarMetricMeasurement> getMetricsForGroup(String group, List<SonarMetricMeasurement> metrics) {
+	private List<MetricMeasurement> getMetricsForGroup(String group, List<MetricMeasurement> metrics) {
 
-		List<SonarMetricMeasurement> 	lines = new ArrayList<>(),
+		List<MetricMeasurement> 	lines = new ArrayList<>(),
 										complex = new ArrayList<>(),
 										struct = new ArrayList<>(),
 										density = new ArrayList<>(),
@@ -245,50 +246,50 @@ public class SonarQualityWidget extends AbstractWidget {
 		
 		if (metrics != null && !metrics.isEmpty()) {
 			if (group.equals("Code Lines related")){
-				for (SonarMetricMeasurement m: metrics){
-					if (m.getSonarMetric().contains("LINE") && !m.getSonarMetric().contains("DENSITY") || m.getSonarMetric().equals("NCLOC") || m.getSonarMetric().equals("STATEMENTS") ){
+				for (MetricMeasurement m: metrics){
+					if (m.getMetricType().contains("LINE") && !m.getMetricType().contains("DENSITY") || m.getMetricType().equals("NCLOC") || m.getMetricType().equals("STATEMENTS") ){
 						lines.add(m);
 					}
 				}
 				return lines;
 			} else if (group.equals("Complexity related")){
-				for (SonarMetricMeasurement m: metrics){
-					if(m.getSonarMetric().contains("COMPLEXITY") && !m.getSonarMetric().contains("DENSITY")){
+				for (MetricMeasurement m: metrics){
+					if(m.getMetricType().contains("COMPLEXITY") && !m.getMetricType().contains("DENSITY")){
 						complex.add(m);
 					}
 				}
 				return complex;
 			} else if (group.equals("Test related")){
-				for (SonarMetricMeasurement m: metrics){
-					if (m.getSonarMetric().contains("TEST") && !m.getSonarMetric().contains("DENSITY")){
+				for (MetricMeasurement m: metrics){
+					if (m.getMetricType().contains("TEST") && !m.getMetricType().contains("DENSITY")){
 						test.add(m);
 					}
 				}
 				return test;
 			} else if (group.equals("Density related")){
-				for (SonarMetricMeasurement m: metrics){
-					if (m.getSonarMetric().contains("DENSITY")){
-						System.out.println(m.getSonarMetric().contains("DENSITY"));
-						System.out.println(m.getSonarMetric());
+				for (MetricMeasurement m: metrics){
+					if (m.getMetricType().contains("DENSITY")){
+						System.out.println(m.getMetricType().contains("DENSITY"));
+						System.out.println(m.getMetricType());
 						density.add(m);
 					}
 				}
 				return density;
 			} else {
-				for (SonarMetricMeasurement m: metrics){
-					if (!m.getSonarMetric().contains("LINE") && 
-							!m.getSonarMetric().contains("COMPLEXITY") &&
-							!m.getSonarMetric().contains("TEST") && 
-							!m.getSonarMetric().contains("DENSITY") &&
-							!m.getSonarMetric().equals("NCLOC") && 
-							!m.getSonarMetric().equals("STATEMENTS")){
+				for (MetricMeasurement m: metrics){
+					if (!m.getMetricType().contains("LINE") && 
+							!m.getMetricType().contains("COMPLEXITY") &&
+							!m.getMetricType().contains("TEST") && 
+							!m.getMetricType().contains("DENSITY") &&
+							!m.getMetricType().equals("NCLOC") && 
+							!m.getMetricType().equals("STATEMENTS")){
 						struct.add(m);
 					}
 				}
 				return struct;
 			}
 		}
-		return new ArrayList<SonarMetricMeasurement>();
+		return new ArrayList<MetricMeasurement>();
 	}
 	
 	/**
@@ -296,8 +297,8 @@ public class SonarQualityWidget extends AbstractWidget {
 	 * @param list
 	 * @return
 	 */
-	private List<SonarMetricMeasurement> removeDuplicates(List<SonarMetricMeasurement> list){
-		Set<SonarMetricMeasurement> set = new LinkedHashSet<>(list);
+	private List<MetricMeasurement> removeDuplicates(List<MetricMeasurement> list){
+		Set<MetricMeasurement> set = new LinkedHashSet<>(list);
 		list.clear();
 		list.addAll(set);
 		return list;

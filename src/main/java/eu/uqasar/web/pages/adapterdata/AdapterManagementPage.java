@@ -55,15 +55,10 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.behavior.CssClassNameApp
 import de.agilecoders.wicket.core.markup.html.bootstrap.button.Buttons;
 import de.agilecoders.wicket.core.markup.html.bootstrap.dialog.Modal;
 import de.agilecoders.wicket.core.markup.html.bootstrap.navigation.ajax.BootstrapAjaxPagingNavigator;
-import eu.uqasar.model.measure.MetricSource;
 import eu.uqasar.model.settings.adapter.AdapterSettings;
 import eu.uqasar.model.tree.Project;
 import eu.uqasar.service.dataadapter.AdapterSettingsService;
-import eu.uqasar.service.dataadapter.CubesDataService;
-import eu.uqasar.service.dataadapter.JenkinsDataService;
-import eu.uqasar.service.dataadapter.JiraDataService;
-import eu.uqasar.service.dataadapter.SonarDataService;
-import eu.uqasar.service.dataadapter.TestLinkDataService;
+import eu.uqasar.service.dataadapter.MetricDataService;
 import eu.uqasar.service.tree.TreeNodeService;
 import eu.uqasar.web.components.JSTemplates;
 import eu.uqasar.web.components.ModalActionButton;
@@ -80,15 +75,7 @@ public class AdapterManagementPage extends BasePage {
 	@Inject
 	private TreeNodeService treeNodeService;
 	@Inject
-	private JiraDataService jiraDataService;
-	@Inject
-	private SonarDataService sonarDataService;
-	@Inject
-	private TestLinkDataService testlinkDataService;
-	@Inject 
-	private CubesDataService cubesDataService;
-	@Inject
-	private JenkinsDataService jenkinsDataService;
+	private MetricDataService metricDataService;
 	
 	// how many adapters do we show per page
 	private static final int itemsPerPage = 10;
@@ -116,10 +103,10 @@ public class AdapterManagementPage extends BasePage {
 		final Form<AdapterSettings> deleteForm = new Form<>("deleteForm");
 		add(deleteForm);
 
-		// add checkgroup for selecting multiple products
+		// add checkgroup for selecting multiple adapters
 		deleteForm.add(adapterGroup = newAdapterSettingsCheckGroup());
 
-		// add the container holding list of existing products
+		// add the container holding list of existing adapters
 		adapterGroup.add(adapterContainer.setOutputMarkupId(true));
 
 		adapterContainer.add(new CheckGroupSelector(
@@ -176,37 +163,9 @@ public class AdapterManagementPage extends BasePage {
 						"edit", AdapterAddEditPage.class,
 						forAdapter(adapterSettings)));
 
-				// Depending on the adapter type add a link to the page 
-				// where the adapter data can be managed.
+				// Add a link to the page where the adapter data can be managed
 				item.add(new BookmarkablePageLink<AdapterDataManagementPage>("manage", 
 						AdapterDataManagementPage.class, forAdapter(adapterSettings)));
-				
-//                if (adapterSettings.getMetricSource() == MetricSource.IssueTracker) {
-//                    item.add(new BookmarkablePageLink<IssueTrackerDataManagementPage>(
-//                        "manage", IssueTrackerDataManagementPage.class, 
-//                        forAdapter(adapterSettings)));
-//                } else if (adapterSettings.getMetricSource() == MetricSource.StaticAnalysis){
-//                    item.add(new BookmarkablePageLink<StaticAnalysisDataManagementPage>(
-//                        "manage", StaticAnalysisDataManagementPage.class, 
-//                        forAdapter(adapterSettings)));
-//                } else if (adapterSettings.getMetricSource() == MetricSource.TestingFramework) {
-//                    item.add(new BookmarkablePageLink<TestFrameworkDataManagementPage>(
-//                    	"manage", TestFrameworkDataManagementPage.class, forAdapter(adapterSettings)));                    
-//                } else if (adapterSettings.getMetricSource() == MetricSource.CubeAnalysis) {
-//                	item.add(new BookmarkablePageLink<CubeAnalysisDataManagementPage>(
-//                    	"manage", CubeAnalysisDataManagementPage.class, 
-//                    	forAdapter(adapterSettings)));
-//                } else if (adapterSettings.getMetricSource() == MetricSource.VersionControl) {
-//                	item.add(new BookmarkablePageLink<GitlabDataManagementPage>(
-//                		"manage", GitlabDataManagementPage.class, 
-//                		forAdapter(adapterSettings)));
-//                } else if (adapterSettings.getMetricSource() == MetricSource.ContinuousIntegration) {
-//                	item.add(new BookmarkablePageLink<JenkinsDataManagementPage>(
-//                    		"manage", JenkinsDataManagementPage.class, 
-//                    		forAdapter(adapterSettings)));                	
-//                } else {
-//                    item.add(new WebMarkupContainer("manage").setVisible(false));
-//                }
 			}
 		};
 		// add list of adapters to container
@@ -291,7 +250,7 @@ public class AdapterManagementPage extends BasePage {
 
 	/**
 	 *
-	 * @param productGroup
+	 * @param adapterGroup
 	 * @return
 	 */
 	private AjaxSubmitLink newDeleteSelectedButton(
@@ -368,7 +327,7 @@ public class AdapterManagementPage extends BasePage {
 
 	/**
 	 *
-	 * @param products
+	 * @param adapters
 	 * @param target
 	 */
 	private void deleteSelectedAdapters(
@@ -385,21 +344,7 @@ public class AdapterManagementPage extends BasePage {
 			}
 			
 			// Delete the measurements belonging to the adapters
-			if (adapter.getMetricSource().equals(MetricSource.IssueTracker)) {
-				jiraDataService.delete(jiraDataService.getAllByAdapter(adapter));
-			}
-			else if (adapter.getMetricSource().equals(MetricSource.StaticAnalysis)) {
-				sonarDataService.delete(sonarDataService.getAllByAdapter(adapter));
-			}
-			else if (adapter.getMetricSource().equals(MetricSource.TestingFramework)) {
-				testlinkDataService.delete(testlinkDataService.getAllByAdapter(adapter));
-			}
-			else if (adapter.getMetricSource().equals(MetricSource.CubeAnalysis)) {
-				cubesDataService.delete(cubesDataService.getAllByAdapter(adapter));
-			}
-			else if (adapter.getMetricSource().equals(MetricSource.ContinuousIntegration)) {
-				jenkinsDataService.delete(jenkinsDataService.getAllByAdapter(adapter));
-			}
+			metricDataService.delete(metricDataService.getAllByAdapter(adapter));
 			
 			// Delete the actual adapter 
 			adapterSettingsService.delete(adapter);

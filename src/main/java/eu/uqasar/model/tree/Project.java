@@ -68,7 +68,7 @@ import eu.uqasar.model.analytic.Analysis;
 import eu.uqasar.model.company.Company;
 import eu.uqasar.model.formula.Formula;
 import eu.uqasar.model.lifecycle.LifeCycleStage;
-import eu.uqasar.model.measure.JiraMetricMeasurement;
+import eu.uqasar.model.measure.MetricMeasurement;
 import eu.uqasar.model.meta.ContinuousIntegrationTool;
 import eu.uqasar.model.meta.CustomerType;
 import eu.uqasar.model.meta.IssueTrackingTool;
@@ -153,7 +153,7 @@ public class Project extends TreeNode implements Comparable<Project> {
 	@JsonIgnore
 	@XmlTransient
 	@OneToMany(cascade = CascadeType.ALL )
-	private List<Snapshot > snapshot = new ArrayList<>();
+	private List<Snapshot> snapshot = new ArrayList<>();
 	
 	@XmlTransient
 	@OneToMany(cascade = CascadeType.ALL, mappedBy="project", orphanRemoval=true)
@@ -161,7 +161,7 @@ public class Project extends TreeNode implements Comparable<Project> {
     
 	@XmlTransient
 	@OneToMany(fetch = FetchType.EAGER,mappedBy = "project", orphanRemoval=true)
-    private Set<JiraMetricMeasurement> jirameasurements = new HashSet<>();
+    private Set<MetricMeasurement> jirameasurements = new HashSet<>();
    
 	@XmlTransient        
     @IndexedEmbedded(prefix = "customerTypes_")
@@ -833,7 +833,7 @@ public class Project extends TreeNode implements Comparable<Project> {
 	/**
      * @return the jirameasurements
      */
-    public Set<JiraMetricMeasurement> getJirameasurements() {
+    public Set<MetricMeasurement> getJirameasurements() {
         return jirameasurements;
     }
 
@@ -841,7 +841,7 @@ public class Project extends TreeNode implements Comparable<Project> {
      * @param jirameasurements the jirameasurements to set
      */
     @JsonIgnore
-    public void setJirameasurements(Set<JiraMetricMeasurement> jirameasurements) {
+    public void setJirameasurements(Set<MetricMeasurement> jirameasurements) {
         this.jirameasurements = jirameasurements;
     }
 

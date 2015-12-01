@@ -59,8 +59,8 @@ import com.hp.hpl.jena.query.QuerySolutionMap;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.util.FileUtils;
+import com.hp.hpl.jena.vocabulary.RDFS;
 
 import eu.uqasar.model.formula.Formula;
 import eu.uqasar.model.measure.MetricSource;
@@ -86,7 +86,7 @@ import eu.uqasar.model.tree.QualityObjective;
 import eu.uqasar.model.tree.QualityStatus;
 import eu.uqasar.model.tree.TreeNode;
 import eu.uqasar.model.user.User;
-import eu.uqasar.service.dataadapter.AdapterDataService;
+import eu.uqasar.service.dataadapter.MetricDataService;
 import eu.uqasar.service.meta.ContinuousIntegrationToolService;
 import eu.uqasar.service.meta.CustomerTypeService;
 import eu.uqasar.service.meta.IssueTrackingToolService;
@@ -567,7 +567,7 @@ public class UQasarUtil {
 		// Update the value
 		try {
 			InitialContext ic = new InitialContext();
-			AdapterDataService adapterDataService = new AdapterDataService();
+			MetricDataService dataService = (MetricDataService) ic.lookup("java:module/MetricDataService");
 			TreeNodeService treeNodeService = (TreeNodeService) ic.lookup("java:module/TreeNodeService");
 			
 			if (node instanceof Metric) {
@@ -577,7 +577,7 @@ public class UQasarUtil {
 				if (metric.getMetricSource() == MetricSource.Manual) {
 					metric.updateQualityStatus();	
 				} else {
-					value = adapterDataService.getMetricValue(metric.getMetricSource(), metric.getMetricType(), metric.getProject());
+					value = dataService.getMetricValue(metric.getMetricSource(), metric.getMetricType(), metric.getProject());
 					metric.setValue(value);
 				}
 				metric.setLastUpdated(getLatestTreeUpdateDate());
@@ -734,7 +734,7 @@ public class UQasarUtil {
         // Update the value
         try {
             InitialContext ic = new InitialContext();
-            AdapterDataService adapterDataService = new AdapterDataService();
+			MetricDataService dataService = (MetricDataService) ic.lookup("java:module/MetricDataService");
             TreeNodeService treeNodeService = (TreeNodeService) ic.lookup("java:module/TreeNodeService");
             
             if (projectTreeNode instanceof Metric) {
@@ -744,7 +744,7 @@ public class UQasarUtil {
                 if (metric.getMetricSource() == MetricSource.Manual) {
                     metric.updateQualityStatus();   
                 } else {
-                    value = adapterDataService.getMetricValue(metric.getMetricSource(), metric.getMetricType(), metric.getProject());
+                    value = dataService.getMetricValue(metric.getMetricSource(), metric.getMetricType(), metric.getProject());
                     metric.setValue(value);
                 }
                 metric.setLastUpdated(getLatestTreeUpdateDate());

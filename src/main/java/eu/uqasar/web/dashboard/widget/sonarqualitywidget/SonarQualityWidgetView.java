@@ -31,12 +31,12 @@ import ro.fortsoft.wicket.dashboard.web.WidgetView;
 
 import com.googlecode.wickedcharts.wicket6.highcharts.Chart;
 
-import eu.uqasar.model.measure.SonarMetricMeasurement;
+import eu.uqasar.model.measure.MetricMeasurement;
 
 public class SonarQualityWidgetView extends WidgetView {
 
 	private static final long serialVersionUID = 2880002420318496717L;
-	private transient List<SonarMetricMeasurement> measurements;
+	private transient List<MetricMeasurement> measurements;
 	private String period;
 	private String individualMetric;
 	public SonarQualityWidgetView(String id, IModel<Widget> model) {
@@ -53,10 +53,10 @@ public class SonarQualityWidgetView extends WidgetView {
 		
 		System.out.println("period: "+period);
 		
-		LoadableDetachableModel<List<SonarMetricMeasurement>> mdl = new LoadableDetachableModel<List<SonarMetricMeasurement>>() {
+		LoadableDetachableModel<List<MetricMeasurement>> mdl = new LoadableDetachableModel<List<MetricMeasurement>>() {
 			private static final long serialVersionUID = 1L;
 
-			protected List<SonarMetricMeasurement> load() {
+			protected List<MetricMeasurement> load() {
 				measurements = qualityWidget.getMeasurements(period);
 				System.out.println("measurements : "+measurements );
 				return measurements;

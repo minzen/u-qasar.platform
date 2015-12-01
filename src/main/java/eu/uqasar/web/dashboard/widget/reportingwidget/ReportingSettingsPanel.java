@@ -56,7 +56,7 @@ import ro.fortsoft.wicket.dashboard.web.DashboardContextAware;
 import ro.fortsoft.wicket.dashboard.web.DashboardPanel;
 import ro.fortsoft.wicket.dashboard.web.WidgetPanel;
 import eu.uqasar.model.dashboard.DbDashboard;
-import eu.uqasar.service.dataadapter.SonarDataService;
+import eu.uqasar.service.dataadapter.MetricDataService;
 import eu.uqasar.web.dashboard.DashboardViewPage;
 
 /**
@@ -70,7 +70,7 @@ public class ReportingSettingsPanel extends GenericPanel<ReportingWidget> implem
 
     private transient DashboardContext dashboardContext;
     private String cube;
-    SonarDataService dataService;
+    private MetricDataService dataService;
     List<String> projects = new ArrayList<String>();
 
     private Map<String, List<String>> rulesMap = new HashMap<String, List<String>>(); // map:rule->additionalRules
@@ -110,7 +110,7 @@ public class ReportingSettingsPanel extends GenericPanel<ReportingWidget> implem
 
         try {
             InitialContext ic = new InitialContext();
-            dataService = (SonarDataService) ic.lookup("java:module/SonarDataService");
+            dataService = (MetricDataService) ic.lookup("java:module/MetricDataService");
             projects = dataService.getSonarProjects();
         } catch (NamingException e) {
             e.printStackTrace();

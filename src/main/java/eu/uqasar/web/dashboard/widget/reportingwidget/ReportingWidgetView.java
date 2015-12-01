@@ -37,7 +37,7 @@ import ro.fortsoft.wicket.dashboard.web.WidgetView;
 
 import com.googlecode.wickedcharts.wicket6.highcharts.Chart;
 
-import eu.uqasar.model.measure.ReportMeasurement;
+import eu.uqasar.model.measure.MetricMeasurement;
 
 /**
  * 
@@ -47,10 +47,10 @@ import eu.uqasar.model.measure.ReportMeasurement;
 public class ReportingWidgetView extends WidgetView {
 
     private static final long serialVersionUID = 2880002420318496717L;
-    private transient List<ReportMeasurement> measurements;
+    private transient List<MetricMeasurement> measurements;
     private String cube, chartType;
     private WebMarkupContainer reportWMC;
-    private ListView<ReportMeasurement> reportView;
+    private ListView<MetricMeasurement> reportView;
 
     private String urlToLoad;
 
@@ -66,10 +66,10 @@ public class ReportingWidgetView extends WidgetView {
         urlToLoad = qualityWidget.getSettings().get("urlToLoad");
         Form<Void> formVoid = new Form<>("formVoid");
 
-        LoadableDetachableModel<List<ReportMeasurement>> mdl = new LoadableDetachableModel<List<ReportMeasurement>>() {
+        LoadableDetachableModel<List<MetricMeasurement>> mdl = new LoadableDetachableModel<List<MetricMeasurement>>() {
             private static final long serialVersionUID = 1L;
 
-            protected List<ReportMeasurement> load() {
+            protected List<MetricMeasurement> load() {
                 measurements = qualityWidget.getMeasurements(cube, urlToLoad);
                 return measurements;
             }
@@ -81,17 +81,17 @@ public class ReportingWidgetView extends WidgetView {
 
         add(formVoid);
 
-        reportWMC = new WebMarkupContainer("reportWMC", new Model<ReportMeasurement>());
+        reportWMC = new WebMarkupContainer("reportWMC", new Model<MetricMeasurement>());
         reportWMC.setOutputMarkupId(true);
         formVoid.add(reportWMC);
 
         if (measurements.size() != 0) {
-            reportWMC.add(new Label("type", measurements.get(0).getReportType()));
+//            reportWMC.add(new Label("type", measurements.get(0).getReportType()));
         } else {
             reportWMC.add(new Label("type", "Rule"));
         }
 
-        reportWMC.add(reportView = new ListView<ReportMeasurement>("reportListView", Model.ofList(measurements)) {
+        reportWMC.add(reportView = new ListView<MetricMeasurement>("reportListView", Model.ofList(measurements)) {
 
             private static final long serialVersionUID = 1L;
 
@@ -103,12 +103,12 @@ public class ReportingWidgetView extends WidgetView {
             }
 
             @Override
-            protected void populateItem(ListItem<ReportMeasurement> item) {
+            protected void populateItem(ListItem<MetricMeasurement> item) {
 
-                final ReportMeasurement proposedReport = item.getModelObject();
+                final MetricMeasurement proposedReport = item.getModelObject();
 
-                item.add(new Label("value", proposedReport.getReportValue()));
-                item.add(new Label("count", proposedReport.getCount()));
+//                item.add(new Label("value", proposedReport.getReportValue()));
+//                item.add(new Label("count", proposedReport.getCount()));
             }
         });
 

@@ -43,14 +43,7 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import eu.uqasar.model.measure.CubesMetricMeasurement;
-import eu.uqasar.model.measure.GitlabMetricMeasurement;
-import eu.uqasar.model.measure.JenkinsMetricMeasurement;
-import eu.uqasar.model.measure.JiraMetricMeasurement;
 import eu.uqasar.model.measure.MetricMeasurement;
-import eu.uqasar.model.measure.MetricSource;
-import eu.uqasar.model.measure.SonarMetricMeasurement;
-import eu.uqasar.model.measure.TestLinkMetricMeasurement;
 import eu.uqasar.model.qmtree.QMTreeNode;
 import eu.uqasar.model.qmtree.QModel;
 import eu.uqasar.model.settings.adapter.AdapterSettings;
@@ -63,12 +56,7 @@ import eu.uqasar.model.tree.historic.HistoricValuesBaseIndicator;
 import eu.uqasar.qualifier.Conversational;
 import eu.uqasar.service.QMTreeNodeService;
 import eu.uqasar.service.dataadapter.AdapterSettingsService;
-import eu.uqasar.service.dataadapter.CubesDataService;
-import eu.uqasar.service.dataadapter.JenkinsDataService;
-import eu.uqasar.service.dataadapter.JiraDataService;
 import eu.uqasar.service.dataadapter.MetricDataService;
-import eu.uqasar.service.dataadapter.SonarDataService;
-import eu.uqasar.service.dataadapter.TestLinkDataService;
 import eu.uqasar.service.tree.TreeNodeService;
 
 /**
@@ -86,22 +74,9 @@ public class UQasarRestService implements Serializable {
 	private QMTreeNodeService qmTreeNodeService; 
 	@Inject
 	private AdapterSettingsService adapterSettingsService;
-	@Inject 
-	private JiraDataService jiraDataService;
-	@Inject 
-	private TestLinkDataService testlinkDataService;
-	@Inject 
-	private SonarDataService sonarDataService;
-	@Inject 
-	private CubesDataService cubesDataService;
-//	@Inject 
-//	private GitlabDataService gitlabDataService;
-	@Inject 
-	private JenkinsDataService jenkinsDataService;
 	@Inject
 	private MetricDataService dataService;
 	private List<TreeNode> allNodes = new LinkedList<TreeNode>();
-
 
 	/**
 	 * Return all projects as JSON
@@ -239,7 +214,6 @@ public class UQasarRestService implements Serializable {
 		String value = null;
 		AdapterSettings settings = adapterSettingsService.getById(adapterId);
 		if (settings != null) {
-//			MetricSource metricSource = settings.getMetricSource();
 
 			List<MetricMeasurement> res = dataService.getAllByAdapter(settings);
 			if (res != null) {
@@ -247,51 +221,6 @@ public class UQasarRestService implements Serializable {
 				value = mapper.writeValueAsString(res);
 				return value;
 			}			
-			
-//			// Handle the different cases of adapter types
-//			if (metricSource != null && metricSource == MetricSource.IssueTracker) {
-//				List<JiraMetricMeasurement> res = jiraDataService.getAllByAdapter(settings);
-//				if (res != null) {
-//					ObjectMapper mapper = new ObjectMapper();
-//					value = mapper.writeValueAsString(res);
-//					return value;
-//				}			
-//			} else if (metricSource != null && metricSource == MetricSource.TestingFramework) {
-//				List<TestLinkMetricMeasurement> res = testlinkDataService.getAllByAdapter(settings);
-//				if (res != null) {
-//					ObjectMapper mapper = new ObjectMapper();
-//					value = mapper.writeValueAsString(res);
-//					return value; 
-//				}
-//			} else if (metricSource != null && metricSource == MetricSource.StaticAnalysis) {
-//				List<SonarMetricMeasurement> res = sonarDataService.getAllByAdapter(settings);
-//				if (res != null) {
-//					ObjectMapper mapper = new ObjectMapper();
-//					value = mapper.writeValueAsString(res);
-//					return value; 
-//				}
-//			} else if (metricSource != null && metricSource == MetricSource.CubeAnalysis){
-//				List<CubesMetricMeasurement> res = cubesDataService.getAllByAdapter(settings);
-//				if (res != null) {
-//					ObjectMapper mapper = new ObjectMapper();
-//					value = mapper.writeValueAsString(res);
-//					return value; 
-//				}
-//			} else if (metricSource != null && metricSource == MetricSource.VersionControl) {
-//				List<GitlabMetricMeasurement> res = gitlabDataService.getAllByAdapter(settings);
-//				if (res != null) {
-//					ObjectMapper mapper = new ObjectMapper();
-//					value = mapper.writeValueAsString(res);
-//					return value; 				
-//				}
-//			} else if (metricSource != null && metricSource == MetricSource.ContinuousIntegration) {
-//				List<JenkinsMetricMeasurement> res = jenkinsDataService.getAllByAdapter(settings);
-//				if (res != null) {
-//					ObjectMapper mapper = new ObjectMapper();
-//					value = mapper.writeValueAsString(res);
-//					return value;
-//				}
-//			}
 		}
 		
 		return value;

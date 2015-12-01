@@ -22,10 +22,7 @@ package eu.uqasar.service.dataadapter;
 
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
@@ -55,7 +52,7 @@ import eu.uqasar.service.PlatformSettingsService;
 import eu.uqasar.util.UQasarUtil;
 
 /**
- * Service entity for obtaining adapter settings
+ * Service entity for obtaining settings for data adapters.
  *
  */
 @Stateless

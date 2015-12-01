@@ -36,9 +36,9 @@ import ro.fortsoft.wicket.dashboard.AbstractWidget;
 import ro.fortsoft.wicket.dashboard.Widget;
 import ro.fortsoft.wicket.dashboard.web.WidgetView;
 import eu.uqasar.adapter.exception.uQasarException;
-import eu.uqasar.model.measure.JiraMetricMeasurement;
+import eu.uqasar.model.measure.MetricMeasurement;
 import eu.uqasar.model.tree.Project;
-import eu.uqasar.service.dataadapter.JiraDataService;
+import eu.uqasar.service.dataadapter.MetricDataService;
 import eu.uqasar.service.tree.TreeNodeService;
 import eu.uqasar.util.UQasarUtil;
 
@@ -102,18 +102,18 @@ public class WidgetForJira extends AbstractWidget {
 	 * 
 	 * @return
 	 */
-	public List<JiraMetricMeasurement> getMeasurements(Project project, String timeInterval) {		
+	public List<MetricMeasurement> getMeasurements(Project project, String timeInterval) {		
 		
-		List<JiraMetricMeasurement> measurements = new ArrayList<JiraMetricMeasurement>();
+		List<MetricMeasurement> measurements = new ArrayList<MetricMeasurement>();
 		try {
 			InitialContext ic = new InitialContext();
-			JiraDataService dataService = (JiraDataService) ic.lookup("java:module/JiraDataService");
+			MetricDataService dataService = (MetricDataService) ic.lookup("java:module/MetricDataService");
 
 			if (dataService != null) {
 				Date latestSnapshotDate = dataService.getLatestDate();
 				if (latestSnapshotDate != null) {
 					for (String metric : UQasarUtil.getJiraMetricNames()) {
-					    List<JiraMetricMeasurement> metricMeasurements = new LinkedList<JiraMetricMeasurement>();
+					    List<MetricMeasurement> metricMeasurements = new LinkedList<MetricMeasurement>();
 					    if (timeInterval.compareToIgnoreCase("Latest") == 0) {
 					        metricMeasurements =         
 					            dataService.getMeasurementsPerProjectByMetricWithLatestDate(project, metric);

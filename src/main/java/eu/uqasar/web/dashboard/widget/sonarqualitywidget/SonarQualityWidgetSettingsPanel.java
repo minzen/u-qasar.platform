@@ -45,7 +45,7 @@ import ro.fortsoft.wicket.dashboard.web.DashboardContextAware;
 import ro.fortsoft.wicket.dashboard.web.DashboardPanel;
 import ro.fortsoft.wicket.dashboard.web.WidgetPanel;
 import eu.uqasar.model.dashboard.DbDashboard;
-import eu.uqasar.service.dataadapter.SonarDataService;
+import eu.uqasar.service.dataadapter.MetricDataService;
 import eu.uqasar.util.UQasarUtil;
 import eu.uqasar.web.dashboard.DashboardViewPage;
 
@@ -55,7 +55,7 @@ public class SonarQualityWidgetSettingsPanel extends GenericPanel<SonarQualityWi
 
     private transient DashboardContext dashboardContext;
     private String project, timeInterval, metric, individualMetric;
-    private SonarDataService dataService;
+    private MetricDataService dataService;
 
     public SonarQualityWidgetSettingsPanel(String id, IModel<SonarQualityWidget> model) {
         super(id, model);
@@ -78,7 +78,7 @@ public class SonarQualityWidgetSettingsPanel extends GenericPanel<SonarQualityWi
         List<String> projects = new ArrayList<String>();
         try {
             InitialContext ic = new InitialContext();
-            dataService = (SonarDataService) ic.lookup("java:module/SonarDataService");
+            dataService = (MetricDataService) ic.lookup("java:module/MetricDataService");
             projects = dataService.getSonarProjects();
         } catch (NamingException e) {
             e.printStackTrace();

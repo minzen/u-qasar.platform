@@ -26,7 +26,7 @@
 <entry key="delete.confirmation.modal.submit.text">Delete</entry>
 <entry key="page.title">Metric Measurements</entry>
 <entry key="name.column">Project name</entry>
-<entry key="metric.column">Metric</entry>
+<entry key="metricType.column">Metric type</entry>
 <entry key="key.column">Operation</entry>
 <entry key="value.column">Value</entry>
 <entry key="timestamp.column">Snapshot Date</entry>

@@ -10,10 +10,14 @@ public interface IMetricMeasurement {
 	public String getName();
 
 	public void setName(String name);
+
+	public MetricSource getMetricSource();
+
+	public void setMetricSource(MetricSource metricSource);
 	
-	public String getMetric();
+	public String getMetricType();
 	
-	public void setMetric(String metric);
+	public void setMetricType(String metricType);
 		
 	public String getValue();
 

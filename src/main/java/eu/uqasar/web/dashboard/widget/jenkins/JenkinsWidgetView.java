@@ -60,9 +60,9 @@ import com.googlecode.wickedcharts.highcharts.options.series.Series;
 import com.googlecode.wickedcharts.highcharts.options.series.SimpleSeries;
 import com.googlecode.wickedcharts.wicket6.highcharts.Chart;
 
-import eu.uqasar.model.measure.JenkinsMetricMeasurement;
+import eu.uqasar.model.measure.MetricMeasurement;
 import eu.uqasar.model.tree.Project;
-import eu.uqasar.service.dataadapter.JenkinsDataService;
+import eu.uqasar.service.dataadapter.MetricDataService;
 import eu.uqasar.service.tree.TreeNodeService;
 
 /**
@@ -75,7 +75,7 @@ public class JenkinsWidgetView extends WidgetView {
 	private static final long serialVersionUID = 7504539323135550980L;
 	private String metricName, projectName;
 	private Project project;
-	private JenkinsMetricMeasurement lastBuildSuccess;
+	private MetricMeasurement lastBuildSuccess;
 	private Map<Number, String> last100Builds;
 	private JenkinsWidget widget;
 	private List<Entry<Number, String>> sortedLast100Builds;
@@ -257,15 +257,15 @@ public class JenkinsWidgetView extends WidgetView {
 		return options;
 	}
 	
-	private JenkinsMetricMeasurement getLastBuildSuccessStatus(Project project){
-		JenkinsDataService jenkinsDataService = null;
+	private MetricMeasurement getLastBuildSuccessStatus(Project project){
+		MetricDataService metricDataService = null;
 		try {
 			InitialContext ic = new InitialContext();
-			jenkinsDataService = (JenkinsDataService) ic.lookup("java:module/JenkinsDataService");
-			List<JenkinsMetricMeasurement> allJenkinsMetricObjects = jenkinsDataService.getAllJenkinsMetricObjects();
-			for(JenkinsMetricMeasurement m : allJenkinsMetricObjects){
+			metricDataService = (MetricDataService) ic.lookup("java:module/MetricDataService");
+			List<MetricMeasurement> allMetricObjects = metricDataService.getAllMetricObjects();
+			for(MetricMeasurement m : allMetricObjects){
 				if(project.equals(m.getProject()) 
-						&& m.getJenkinsMetric().equals("JENKINS_LATEST_BUILD_SUCCESS")){
+						&& m.getMetricType().equals("JENKINS_LATEST_BUILD_SUCCESS")){
 					return m;
 				}
 				
@@ -277,15 +277,15 @@ public class JenkinsWidgetView extends WidgetView {
 	}
 	
 	private Map<Number, String> getLast100Builds(Project project2) {
-		JenkinsDataService jenkinsDataService = null;
+		MetricDataService metricDataService = null;
 		Map<Number, String> last100 = new ConcurrentHashMap<>();		
 		try {
 			InitialContext ic = new InitialContext();
-			jenkinsDataService = (JenkinsDataService) ic.lookup("java:module/JenkinsDataService");
-			List<JenkinsMetricMeasurement> allJenkinsMetricObjects = jenkinsDataService.getAllJenkinsMetricObjects();
-			for(JenkinsMetricMeasurement m : allJenkinsMetricObjects){
+			metricDataService = (MetricDataService) ic.lookup("java:module/MetricDataService");
+			List<MetricMeasurement> allJenkinsMetricObjects = metricDataService.getAllMetricObjects();
+			for(MetricMeasurement m : allJenkinsMetricObjects){
 				if(project.equals(m.getProject()) 
-						&& m.getJenkinsMetric().equals("JENKINS_BUILD_HISTORY")){
+						&& m.getMetricType().equals("JENKINS_BUILD_HISTORY")){
 		
 					JSONArray json = new JSONArray(m.getValue());					
 					for (int i = 0; i < json.length()-1; i++) {

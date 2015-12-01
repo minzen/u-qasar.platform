@@ -37,12 +37,12 @@ import ro.fortsoft.wicket.dashboard.web.WidgetView;
 
 import com.googlecode.wickedcharts.wicket6.highcharts.Chart;
 
-import eu.uqasar.model.measure.TestLinkMetricMeasurement;
-import eu.uqasar.service.dataadapter.TestLinkDataService;
+import eu.uqasar.model.measure.MetricMeasurement;
+import eu.uqasar.service.dataadapter.MetricDataService;
 
 public class TestLinkWidgetView extends WidgetView {
 
-	TestLinkDataService TDT;
+	MetricDataService metricDataService;
 	/**
 	 * 
 	 */
@@ -55,7 +55,7 @@ public class TestLinkWidgetView extends WidgetView {
 		
 		try {
 			InitialContext ic = new InitialContext();
-			TDT = (TestLinkDataService) ic.lookup("java:module/TestLinkDataService");			
+			metricDataService = (MetricDataService) ic.lookup("java:module/MetricDataService");			
 		} catch (NamingException e) {
 			e.printStackTrace();
 		}
@@ -70,20 +70,20 @@ public class TestLinkWidgetView extends WidgetView {
 			String name = testLinkWidget.getSettings().get("project");
 		}
 		
-		LoadableDetachableModel<List<TestLinkMetricMeasurement>> metricsData = new LoadableDetachableModel<List<TestLinkMetricMeasurement>>() {
+		LoadableDetachableModel<List<MetricMeasurement>> metricsData = new LoadableDetachableModel<List<MetricMeasurement>>() {
 			private static final long serialVersionUID = -8120427341331851718L;
 
 			@Override
-			protected List<TestLinkMetricMeasurement> load() {
-				Date latestSnapshotDate = TDT.getLatestDate();
+			protected List<MetricMeasurement> load() {
+				Date latestSnapshotDate = metricDataService.getLatestDate();
 				if (latestSnapshotDate != null) {
 				    if(period.compareToIgnoreCase("Latest") == 0){
-				        return TDT.getMeasurementsForProjectByLatestDate("UQASAR");
+				        return metricDataService.getMeasurementsForProjectByLatestDate("UQASAR");
 				    }else{
-				        return TDT.getMeasurementsForProjectByPeriod("UQASAR", period);
+				        return metricDataService.getMeasurementsForProjectByPeriod("UQASAR", period);
 				    }
 				} else {
-					return new ArrayList<TestLinkMetricMeasurement>();
+					return new ArrayList<MetricMeasurement>();
 				}
 			}
 		};

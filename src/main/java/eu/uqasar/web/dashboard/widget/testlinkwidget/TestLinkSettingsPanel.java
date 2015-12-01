@@ -39,7 +39,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import eu.uqasar.model.dashboard.DbDashboard;
-import eu.uqasar.service.dataadapter.TestLinkDataService;
+import eu.uqasar.service.dataadapter.MetricDataService;
 import eu.uqasar.util.UQasarUtil;
 import eu.uqasar.web.dashboard.DashboardViewPage;
 import ro.fortsoft.wicket.dashboard.Dashboard;
@@ -71,7 +71,7 @@ implements DashboardContextAware {
 		List<String> projects = new ArrayList<String>();
 		try {
 			InitialContext ic = new InitialContext();
-			TestLinkDataService dataService = (TestLinkDataService) ic.lookup("java:module/TestLinkDataService");
+			MetricDataService dataService = (MetricDataService) ic.lookup("java:module/MetricDataService");
 			projects = dataService.getTestLinkProjects();
 		} catch (NamingException e) {
 			e.printStackTrace();

@@ -42,9 +42,9 @@ import com.googlecode.wickedcharts.highcharts.options.Title;
 import com.googlecode.wickedcharts.highcharts.options.series.Point;
 import com.googlecode.wickedcharts.highcharts.options.series.PointSeries;
 
-import eu.uqasar.model.measure.TestLinkMetricMeasurement;
+import eu.uqasar.model.measure.MetricMeasurement;
 import eu.uqasar.model.tree.Project;
-import eu.uqasar.service.dataadapter.TestLinkDataService;
+import eu.uqasar.service.dataadapter.MetricDataService;
 import eu.uqasar.service.tree.TreeNodeService;
 
 public class TestLinkWidget extends AbstractWidget {
@@ -109,19 +109,19 @@ public class TestLinkWidget extends AbstractWidget {
 	 * Get the measurements
 	 * @return
 	 */
-	public List<TestLinkMetricMeasurement> getMeasurements(String period) {
+	public List<MetricMeasurement> getMeasurements(String period) {
 
-		List<TestLinkMetricMeasurement> measurements = new ArrayList<TestLinkMetricMeasurement>();
+		List<MetricMeasurement> measurements = new ArrayList<MetricMeasurement>();
 
 		try {
 			InitialContext ic = new InitialContext();
-			TestLinkDataService dataService = (TestLinkDataService) ic.lookup("java:module/TestLinkDataService");
+			MetricDataService dataService = (MetricDataService) ic.lookup("java:module/MetricDataService");
 
 			Date latestSnapshotDate = dataService.getLatestDate();
 			if (latestSnapshotDate != null) {
-			    if(period.compareToIgnoreCase("Latest") == 0){
+			    if (period.compareToIgnoreCase("Latest") == 0){
 			        measurements = dataService.getMeasurementsForProjectByLatestDate(project.getAbbreviatedName());
-			    }else{
+			    } else{
 			        measurements = dataService.getMeasurementsForProjectByPeriod(project.getAbbreviatedName(), period);
 			    }
 			}
@@ -153,7 +153,7 @@ public class TestLinkWidget extends AbstractWidget {
 	 * @param metrics
 	 * @return
 	 */
-	public Options getChartOptions(List<TestLinkMetricMeasurement> metrics) {
+	public Options getChartOptions(List<MetricMeasurement> metrics) {
 
 		Options options = new Options();
 		ChartOptions chartOptions =  new ChartOptions();
@@ -165,7 +165,7 @@ public class TestLinkWidget extends AbstractWidget {
 		series.setType(seriesType);
 
 		// remove TOTAL metric	
-		List<TestLinkMetricMeasurement> noTotal = removeTotalMetric(metrics); 
+		List<MetricMeasurement> noTotal = removeTotalMetric(metrics); 
 		if (noTotal != null && !noTotal.isEmpty()) {
 			int items = 4;
 			if (noTotal.size() < items) {
@@ -173,12 +173,12 @@ public class TestLinkWidget extends AbstractWidget {
 			}
 				// we obtain the metrics, sorted by timestamp (descending)
 				for (int tlm= 0; tlm < items; tlm++){				
-					TestLinkMetricMeasurement metric = noTotal.get(tlm);				
-					if (metric.getTestLinkMetric().equals("TEST_P")) {				
+					MetricMeasurement metric = noTotal.get(tlm);				
+					if (metric.getMetricType().equals("TEST_P")) {				
 						series.addPoint(new Point("Tests Passed", new Double(metric.getValue())));					
-					} else if (metric.getTestLinkMetric().equals("TEST_F")) {
+					} else if (metric.getMetricType().equals("TEST_F")) {
 						series.addPoint(new Point("Tests Failed", new Double(metric.getValue())));
-					} else if (metric.getTestLinkMetric().equals("TEST_B")) {
+					} else if (metric.getMetricType().equals("TEST_B")) {
 						series.addPoint(new Point("Tests Blocking", new Double(metric.getValue())));
 					} else {
 						series.addPoint(new Point("Tests Not Executed", new Double(metric.getValue())));
@@ -197,7 +197,7 @@ public class TestLinkWidget extends AbstractWidget {
      * @param metrics
      * @return
      */
-    public Options getChartOptionsDifferently(List<TestLinkMetricMeasurement> metrics,String individualMetric) {
+    public Options getChartOptionsDifferently(List<MetricMeasurement> metrics,String individualMetric) {
 
         Options options = new Options();
         ChartOptions chartOptions =  new ChartOptions();
@@ -209,7 +209,7 @@ public class TestLinkWidget extends AbstractWidget {
         series.setType(seriesType);
 
         // remove TOTAL metric  
-        List<TestLinkMetricMeasurement> noTotal = removeExtraMetrics(metrics,individualMetric); 
+        List<MetricMeasurement> noTotal = removeExtraMetrics(metrics,individualMetric); 
         if (noTotal != null && !noTotal.isEmpty()) {
             int items = 4;
             if (noTotal.size() < items) {
@@ -217,12 +217,12 @@ public class TestLinkWidget extends AbstractWidget {
             }
                 // we obtain the metrics, sorted by timestamp (descending)
                 for (int tlm= 0; tlm < items; tlm++){               
-                    TestLinkMetricMeasurement metric = noTotal.get(tlm);                
-                    if (metric.getTestLinkMetric().equals("TEST_P")) {              
+                    MetricMeasurement metric = noTotal.get(tlm);                
+                    if (metric.getMetricType().equals("TEST_P")) {              
                         series.addPoint(new Point("Tests Passed", new Double(metric.getValue())));                  
-                    } else if (metric.getTestLinkMetric().equals("TEST_F")) {
+                    } else if (metric.getMetricType().equals("TEST_F")) {
                         series.addPoint(new Point("Tests Failed", new Double(metric.getValue())));
-                    } else if (metric.getTestLinkMetric().equals("TEST_B")) {
+                    } else if (metric.getMetricType().equals("TEST_B")) {
                         series.addPoint(new Point("Tests Blocking", new Double(metric.getValue())));
                     } else {
                         series.addPoint(new Point("Tests Not Executed", new Double(metric.getValue())));
@@ -242,10 +242,10 @@ public class TestLinkWidget extends AbstractWidget {
 	 * @param metrics
 	 * @return
 	 */
-	private String getTotalMetric(List<TestLinkMetricMeasurement> metrics) {
+	private String getTotalMetric(List<MetricMeasurement> metrics) {
 		String total = "";
-		for(TestLinkMetricMeasurement tlm : metrics){
-			if(tlm.getTestLinkMetric().equals("TEST_TOTAL")){
+		for(MetricMeasurement tlm : metrics){
+			if(tlm.getMetricType().equals("TEST_TOTAL")){
 				total = tlm.getValue();
 			}
 		}
@@ -257,12 +257,12 @@ public class TestLinkWidget extends AbstractWidget {
 	 * @param metrics
 	 * @return
 	 */
-	private List<TestLinkMetricMeasurement> removeTotalMetric(List<TestLinkMetricMeasurement> metrics) {
+	private List<MetricMeasurement> removeTotalMetric(List<MetricMeasurement> metrics) {
 
-		List<TestLinkMetricMeasurement> noTotal = new ArrayList<>();
+		List<MetricMeasurement> noTotal = new ArrayList<>();
 		if (metrics != null && !metrics.isEmpty()) {
-			for (TestLinkMetricMeasurement tlm : metrics){
-				if (!tlm.getTestLinkMetric().equals("TEST_TOTAL")){
+			for (MetricMeasurement tlm : metrics){
+				if (!tlm.getMetricType().equals("TEST_TOTAL")){
 					noTotal.add(tlm);
 				}
 			}
@@ -270,17 +270,17 @@ public class TestLinkWidget extends AbstractWidget {
 		return noTotal;
 	}
 	
-	/** This method removes all the metrics oter than given individual Metric
+	/** This method removes all the metrics other than given individual Metric
      * 
      * @param metrics
      * @return
      */
-    private List<TestLinkMetricMeasurement> removeExtraMetrics(List<TestLinkMetricMeasurement> metrics,String individualMetric) {
+    private List<MetricMeasurement> removeExtraMetrics(List<MetricMeasurement> metrics,String individualMetric) {
 
-        List<TestLinkMetricMeasurement> noTotal = new ArrayList<>();
+        List<MetricMeasurement> noTotal = new ArrayList<>();
         if (metrics != null && !metrics.isEmpty()) {
-            for (TestLinkMetricMeasurement tlm : metrics){
-                if (tlm.getTestLinkMetric().equals(individualMetric)){
+            for (MetricMeasurement tlm : metrics){
+                if (tlm.getMetricType().equals(individualMetric)){
                     noTotal.add(tlm);
                 }
             }

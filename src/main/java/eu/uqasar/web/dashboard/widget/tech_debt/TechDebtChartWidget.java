@@ -71,7 +71,7 @@ import com.googlecode.wickedcharts.highcharts.options.series.Point;
 import com.googlecode.wickedcharts.highcharts.options.series.PointSeries;
 import com.googlecode.wickedcharts.highcharts.options.series.SimpleSeries;
 
-import eu.uqasar.model.measure.JiraMetricMeasurement;
+import eu.uqasar.model.measure.MetricMeasurement;
 import eu.uqasar.model.tree.Project;
 import eu.uqasar.service.tree.TreeNodeService;
 
@@ -247,8 +247,8 @@ public class TechDebtChartWidget extends AbstractWidget{
 		int met3 = 0; // Resolved Issues
 
 		while (itr.hasNext()) {
-			JiraMetricMeasurement jmeas = (JiraMetricMeasurement) itr.next();
-			String metric = jmeas.getJiraMetric();
+			MetricMeasurement jmeas = (MetricMeasurement) itr.next();
+			String metric = jmeas.getMetricType();
 			if (metric.equalsIgnoreCase("UNRESOLVED_TASK_ISSUES_PER_PROJECT"))
 				met1++;
 			if (metric.equalsIgnoreCase("UNRESOLVED_ISSUES_PER_PROJECT"))

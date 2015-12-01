@@ -42,16 +42,16 @@ import com.googlecode.wickedcharts.highcharts.options.series.SimpleSeries;
 import com.googlecode.wickedcharts.wicket6.highcharts.Chart;
 
 import eu.uqasar.adapter.exception.uQasarException;
-import eu.uqasar.model.measure.JiraMetricMeasurement;
+import eu.uqasar.model.measure.MetricMeasurement;
 import eu.uqasar.model.tree.Project;
-import eu.uqasar.service.dataadapter.JiraDataService;
+import eu.uqasar.service.dataadapter.MetricDataService;
 import eu.uqasar.service.tree.TreeNodeService;
 import eu.uqasar.util.UQasarUtil;
 
 public class WidgetForJIRAView extends WidgetView {
 
 	private static final long serialVersionUID = 2880002420318496717L;
-	private transient List<JiraMetricMeasurement> measurements = new ArrayList<>();
+	private transient List<MetricMeasurement> measurements = new ArrayList<>();
 	private String chartType, timeInterval, projectName, individualMetric;
 	private Project project;
 	private Chart jiraChart;
@@ -108,15 +108,15 @@ public class WidgetForJIRAView extends WidgetView {
         options.setyAxis(new Axis().setTitle(new Title("Number of issues")));
 
         List<Number> resItems = new ArrayList<>();
-        for (JiraMetricMeasurement jiraMeasurement : measurements) {
+        for (MetricMeasurement jiraMeasurement : measurements) {
             int count;
             try {
                 if (timeInterval.compareToIgnoreCase("Latest") == 0) {
                     count = getDataService().countMeasurementsPerProjectByMetricWithLatestDate(project,
-                        jiraMeasurement.getJiraMetric());
+                        jiraMeasurement.getMetricType());
                 }
                 count = getDataService().countMeasurementsPerProjectByMetricWithinPeriod(project,
-                    jiraMeasurement.getJiraMetric(), timeInterval);
+                    jiraMeasurement.getMetricType(), timeInterval);
                 resItems.add(count);
             } catch (uQasarException e1) {
                 e1.printStackTrace();
@@ -142,17 +142,17 @@ public class WidgetForJIRAView extends WidgetView {
         options.setyAxis(new Axis().setTitle(new Title("Number of issues")));
 
         List<Number> resItems = new ArrayList<>();
-        for (JiraMetricMeasurement jiraMeasurement : measurements) {
+        for (MetricMeasurement jiraMeasurement : measurements) {
 
-            if (jiraMeasurement.getJiraMetric().equals(individualMetric)) {
+            if (jiraMeasurement.getMetricType().equals(individualMetric)) {
                 int count;
                 try {
                     if (timeInterval.compareToIgnoreCase("Latest") == 0) {
                         count = getDataService().countMeasurementsPerProjectByMetricWithLatestDate(project,
-                            jiraMeasurement.getJiraMetric());
+                            jiraMeasurement.getMetricType());
                     }
                     count = getDataService().countMeasurementsPerProjectByMetricWithinPeriod(project,
-                        jiraMeasurement.getJiraMetric(), timeInterval);
+                        jiraMeasurement.getMetricType(), timeInterval);
                     resItems.add(count);
                 } catch (uQasarException e1) {
                     e1.printStackTrace();
@@ -169,11 +169,11 @@ public class WidgetForJIRAView extends WidgetView {
 	 * 
 	 * @return
 	 */
-	private JiraDataService getDataService() {
-		JiraDataService dataService = null;
+	private MetricDataService getDataService() {
+		MetricDataService dataService = null;
 		try {
 			InitialContext ic = new InitialContext();
-			dataService = (JiraDataService) ic.lookup("java:module/JiraDataService");
+			dataService = (MetricDataService) ic.lookup("java:module/MetricDataService");
 		} catch (NamingException e) {
 			e.printStackTrace();
 		}

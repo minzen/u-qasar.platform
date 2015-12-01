@@ -40,6 +40,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.codec.binary.Base64;
+import org.joda.time.DateTime;
 
 import us.monoid.json.JSONException;
 import us.monoid.web.JSONResource;
@@ -54,14 +55,10 @@ import eu.uqasar.cubes.adapter.CubesAdapter;
 import eu.uqasar.gitlab.adapter.GitlabAdapter;
 import eu.uqasar.jenkins.adapter.JenkinsAdapter;
 import eu.uqasar.jira.adapter.JiraAdapter;
-import eu.uqasar.model.measure.CubesMetricMeasurement;
-import eu.uqasar.model.measure.GitlabMetricMeasurement;
-import eu.uqasar.model.measure.JenkinsMetricMeasurement;
 import eu.uqasar.model.measure.JiraMetricMeasurement;
 import eu.uqasar.model.measure.MetricMeasurement;
 import eu.uqasar.model.measure.MetricMeasurement_;
 import eu.uqasar.model.measure.MetricSource;
-import eu.uqasar.model.measure.TestLinkMetricMeasurement;
 import eu.uqasar.model.settings.adapter.AdapterSettings;
 import eu.uqasar.model.tree.Project;
 import eu.uqasar.qualifier.Conversational;
@@ -70,6 +67,10 @@ import eu.uqasar.sonar.adapter.SonarAdapter;
 import eu.uqasar.testlink.adapter.TestLinkAdapter;
 import eu.uqasar.util.UQasarUtil;
 
+/**
+ * Methods for obtaining metric data
+ * 
+ */
 @Stateless
 @Conversational
 public class MetricDataService extends AbstractService<MetricMeasurement> {
@@ -300,7 +301,8 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 		// Select which adapter is to be used
 		SystemAdapter adapter = null;
 		List<String> metrics = new ArrayList<>();
-
+		
+		// SonarQube Adapter
 		if (adapterSettings.getMetricSource().equals(MetricSource.StaticAnalysis)) {
 			
 			if (testConnectionToServer(boundSystemURL, 10000) == false) return;
@@ -322,9 +324,10 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 						MetricMeasurement[] measurement = gson.fromJson(json, 
 								MetricMeasurement[].class);
 						for (int i = 0; i < measurement.length; i++) {
-							// Add a timestamp and metric name to the object´
+							// Add a timestamp and metric name to the object
+							measurement[i].setMetricSource(MetricSource.StaticAnalysis);
 							measurement[i].setTimeStamp(snapshotTimeStamp);
-							measurement[i].setMetric(metric);
+							measurement[i].setMetricType(metric);
 							measurement[i].setProject(adapterSettings.getProject());
 							measurement[i].setAdapter(adapterSettings);
 							// Create an entity
@@ -341,6 +344,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 			adapter = new JiraAdapter();
 			List<String> metricNames = UQasarUtil.getJiraMetricNames();
 
+			// TODO: Re-implement the adapter to fetch the required content already from there. 
 			// Init resty for fetching the JSON content
 			Resty resty = new Resty();
 			// encoding byte array into base64
@@ -355,32 +359,45 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 				List<Measurement> metricMeasurements = adapter.query(boundSystemURL, credentials, metric);
 				for (Measurement measurement : metricMeasurements) {
 					String json = measurement.getMeasurement();
+					System.out.println("JSON: " +json);
 					Gson gson = new Gson();
-					MetricMeasurement[] metricMeasurement = gson.fromJson(json, 
-							MetricMeasurement[].class);
-					for (int i = 0; i < metricMeasurement.length; i++) {
+					JiraMetricMeasurement[] jiraMetricMeasurement = gson.fromJson(json, 
+							JiraMetricMeasurement[].class);
+					for (int i = 0; i < jiraMetricMeasurement.length; i++) {
 						// Add a timestamp and metric name to the object
-						metricMeasurement[i].setTimeStamp(snapshotTimeStamp);
-						metricMeasurement[i].setMetric(metric);
-						metricMeasurement[i].setProject(adapterSettings.getProject());
-						metricMeasurement[i].setAdapter(adapterSettings);
+						jiraMetricMeasurement[i].setTimeStamp(snapshotTimeStamp);
+						jiraMetricMeasurement[i].setMetricType(metric);
+						jiraMetricMeasurement[i].setProject(adapterSettings.getProject());
+						jiraMetricMeasurement[i].setAdapter(adapterSettings);
 
-//						// Get the url from the measurement for fetching the JSON content 
-//						String url = metricMeasurement[i].getValue();
-//						String jsonContent = "";
-//						try {
-//							JSONResource res = resty.json(url);
-//							us.monoid.json.JSONObject jobj = res.toObject();
-//							jsonContent = jobj.toString();
-//							metricMeasurement[i].setContent(jsonContent);
-//						} catch (IOException e) {
-//							e.printStackTrace();
-//						} catch (JSONException e) {
-//							e.printStackTrace();
-//						}
+						// Get the url from the measurement for fetching the JSON content 
+						String url = jiraMetricMeasurement[i].getSelf();
+						System.out.println("Jira URL:  " +url);
+						String jsonContent = "";
+						try {
+							JSONResource res = resty.json(url);
+							us.monoid.json.JSONObject jobj = res.toObject();
+							jsonContent = jobj.toString();
+							jiraMetricMeasurement[i].setContent(jsonContent);
+						} catch (IOException e) {
+							e.printStackTrace();
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
 
+						MetricMeasurement metricMeasurement = new MetricMeasurement();
+						metricMeasurement.setAdapter(jiraMetricMeasurement[i].getAdapter());
+						metricMeasurement.setContent(jiraMetricMeasurement[i].getContent());
+						metricMeasurement.setMetricSource(MetricSource.IssueTracker);
+						metricMeasurement.setMetricType(jiraMetricMeasurement[i].getMetricType());
+						metricMeasurement.setName(jiraMetricMeasurement[i].getName());
+						metricMeasurement.setProject(jiraMetricMeasurement[i].getProject());
+						metricMeasurement.setAdapter(jiraMetricMeasurement[i].getAdapter());
+						metricMeasurement.setTimeStamp(jiraMetricMeasurement[i].getTimeStamp());
+						metricMeasurement.setValue(jiraMetricMeasurement[i].getValue());
+						
 						// persist the measurement
-						create(metricMeasurement[i]);
+						create(metricMeasurement);
 					}
 				}
 			}
@@ -405,7 +422,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 						MetricMeasurement measurement = new MetricMeasurement();
 						measurement.setValue(m.getMeasurement());
 						measurement.setTimeStamp(snapshotTimeStamp);
-						measurement.setMetric(metric);
+						measurement.setMetricType(metric);
 						measurement.setProject(adapterSettings.getProject());
 						measurement.setAdapter(adapterSettings);
 						// Create an entity
@@ -432,7 +449,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 						MetricMeasurement measurement = new MetricMeasurement();
 						measurement.setValue(m.getMeasurement());
 						measurement.setTimeStamp(snapshotTimeStamp);
-						measurement.setMetric(metric);
+						measurement.setMetricType(metric);
 						measurement.setProject(adapterSettings.getProject());
 						measurement.setAdapter(adapterSettings);
 						// Create an entity
@@ -472,7 +489,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 						measurement.setName(testProjectName);
 						measurement.setValue(m.getMeasurement());
 						measurement.setTimeStamp(snapshotTimeStamp);
-						measurement.setMetric(metric);
+						measurement.setMetricType(metric);
 						measurement.setProject(adapterSettings.getProject());
 						measurement.setAdapter(adapterSettings);
 						create(measurement);
@@ -500,7 +517,7 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 					for (int i = 0; i < metricMeasurement.length; i++) {
 						// Add a timestamp and metric name to the object
 						metricMeasurement[i].setTimeStamp(snapshotTimeStamp);
-						metricMeasurement[i].setMetric(metric);
+						metricMeasurement[i].setMetricType(metric);
 						metricMeasurement[i].setProject(adapterSettings.getProject());
 						metricMeasurement[i].setAdapter(adapterSettings);
 						create(metricMeasurement[i]);
@@ -625,6 +642,338 @@ public class MetricDataService extends AbstractService<MetricMeasurement> {
 		return measurement;
 
 	}
+
+	/**
+	 * Get a list of available Sonar project names 
+	 * @return
+	 */
+	public List<String> getSonarProjects() {
+		logger.info("Getting Sonar projects...");
+		List<MetricMeasurement> measurements = getAllMetricObjects();
+		List<String> projects = new ArrayList<String>();
+		for (MetricMeasurement metricMeasurement : measurements) {
+			if (metricMeasurement.getAdapter().getMetricSource().equals(MetricSource.StaticAnalysis)) {
+				String project = metricMeasurement.getName();
+				if (!projects.contains(project)) {
+					projects.add(project);
+				}
+			}
+		}		
+		return projects;
+	}
+
+	
+	/**
+	 * Get a list of available TestLink project names 
+	 * @return
+	 */
+	public List<String> getTestLinkProjects() {
+		logger.info("Getting TestLink projects...");
+		List<MetricMeasurement> measurements = getAllTestLinkMetricObjects();
+		List<String> projects = new ArrayList<String>();
+		for (MetricMeasurement measurement : measurements) {
+			String project = measurement.getName();
+			if (!projects.contains(project)) {
+				projects.add(project);
+			}
+		}
+
+		return projects;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public List<MetricMeasurement> getAllTestLinkMetricObjects() {
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<MetricMeasurement> query = 
+				cb.createQuery(MetricMeasurement.class);
+		Root<MetricMeasurement> root = query.from(MetricMeasurement.class);
+		Predicate condition = cb.equal(root.get(MetricMeasurement_.metric), MetricSource.TestingFramework);
+		query.where(condition);		
+		List<MetricMeasurement> resultList = 
+				em.createQuery(query).getResultList();
+		return resultList;
+	}	
+	
+	/**
+	 * 
+	 * @param project
+	 * @param date
+	 * @return
+	 */
+	public List<MetricMeasurement> getMeasurementsForProjectByPeriod(String project, String period) {
+		logger.info("Obtaining measurements for the project: " +project +" within the: " + period);
+		List<MetricMeasurement> measurements = new ArrayList<>();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<MetricMeasurement> query = 
+				cb.createQuery(MetricMeasurement.class);
+		Root<MetricMeasurement> root = 
+				query.from(MetricMeasurement.class);
+
+		Predicate condition = cb.equal(
+				root.get(MetricMeasurement_.name), project);
+
+		Date from = getDateForPeriod(period);		
+		Date to = DateTime.now().toDate();
+		Predicate condition2 = cb.between(root.get(MetricMeasurement_.timeStamp), from, to);
+
+		Predicate condition3 = cb.and(condition, condition2);
+		query.where(condition3);
+		query.orderBy(cb.desc(root.get(MetricMeasurement_.timeStamp)));
+		if (em.createQuery(query).getResultList() != null && !em.createQuery(query).getResultList().isEmpty()) {
+			measurements = em.createQuery(query).getResultList();
+		}
+		return measurements;
+	}
+
+	/**
+	 * 
+	 * @param project
+	 * @return
+	 */
+	public List<MetricMeasurement> getMeasurementsForProjectByLatestDate(String project) {
+		List<MetricMeasurement> results = getMeasurementsForProject(project);
+
+		Date newDate = null;
+		for(MetricMeasurement tMM : results){
+
+			if (newDate == null ||  tMM.getTimeStamp().compareTo(newDate) > 0){
+				newDate = tMM.getTimeStamp();
+			}  
+		}
+
+		List<MetricMeasurement> resultsLatest = 
+				getMeasurementsForProjectByDate(project,newDate);
+
+		return resultsLatest;
+	}
+
+	
+	/**
+	 * Get a date for a time period denoted by the parameter  
+	 * @param period
+	 * @return
+	 */
+	private Date getDateForPeriod(String period) {
+		DateTime now = DateTime.now();
+		Date date;
+
+		if(period.equals("Last Year")){
+			date = now.minusMonths(12).toDate(); 
+		} else if(period.equals("Last 6 Months")){
+			date = now.minusMonths(6).toDate(); 
+		} else if(period.equals("Last Month")){
+			date = now.minusMonths(1).toDate(); 
+		} else if(period.equals("Last Week")){
+			date = now.minusWeeks(1).toDate();
+		} else{
+			date = now.minusYears(5).toDate();
+		}
+		//System.out.println("datedatedate:"+date);
+
+		return date;
+	}
+
+	/**
+     * 
+     * @param project
+     * @return
+     */
+    public List<MetricMeasurement> getLatestMeasurementByProject(
+            String project) {
+        List<MetricMeasurement> resultList = getMeasurementsForProject(project);
+        Date newestDate = null;
+        for(MetricMeasurement smm : resultList){
+            if (newestDate == null || smm.getTimeStamp().compareTo(newestDate) > 0){
+                newestDate = smm.getTimeStamp();
+            }  
+        }
+        List<MetricMeasurement> resultListLatest = getMeasurementsForProjectByDate(project,newestDate);
+        return resultListLatest;               
+    }
+
+    
+	/**
+	 * 
+	 * @param metric
+	 * @param date
+	 * @return
+	 * @throws uQasarException
+	 */
+	public List<MetricMeasurement> getMeasurementsPerProjectByMetricWithinPeriod(Project project, String metric, String period) 
+			throws uQasarException {
+
+		List<MetricMeasurement> measurements = new ArrayList<>();
+		if (project != null && metric != null && period != null) {
+			logger.info("Count measurements for project + " + project.getAbbreviatedName() +" and metric: " +metric);
+
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<MetricMeasurement> query = cb.createQuery(MetricMeasurement.class);
+			Root<MetricMeasurement> root = query.from(MetricMeasurement.class);
+
+			Predicate condition1 = cb.equal(root.get(MetricMeasurement_.metric), metric);
+			Predicate condition2 = cb.equal(root.get(MetricMeasurement_.project), project);
+
+			Date from = getDateForPeriod(period);		
+			Date to = DateTime.now().toDate();
+			Predicate condition3 = cb.between(root.get(MetricMeasurement_.timeStamp), from, to);
+			//		System.out.println("from:"+from);
+			//		System.out.println("to:"+to);
+
+			Predicate condition4 = cb.and(condition1, condition2, condition3);
+			query.where(condition4);
+			query.orderBy(cb.desc(root.get(MetricMeasurement_.timeStamp)));
+			measurements = em.createQuery(query).getResultList();
+		}
+
+		return measurements;
+	}
+
+
+	/** 
+	 * @param metric
+	 * @param project
+	 * @return
+	 * @throws uQasarException
+	 */
+	public List<MetricMeasurement> getMeasurementsPerProjectByMetricWithLatestDate(Project project, String metric) 
+			throws uQasarException {
+		logger.info("Count measurements for project + " + project.getAbbreviatedName() +" and metric: " +metric + "with latest date");
+
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<MetricMeasurement> query = cb.createQuery(MetricMeasurement.class);
+		Root<MetricMeasurement> root = query.from(MetricMeasurement.class);
+
+		Predicate condition1 = cb.equal(root.get(MetricMeasurement_.metric), metric);
+		Predicate condition2 = cb.equal(root.get(MetricMeasurement_.project), project);
+
+
+		Predicate condition4 = cb.and(condition1, condition2);
+		query.where(condition4);
+		query.orderBy(cb.desc(root.get(MetricMeasurement_.timeStamp)));
+		List<MetricMeasurement> returnResults = em.createQuery(query).getResultList();
+
+		Date newDate = null;
+		for (MetricMeasurement jMM : returnResults ){
+			if (newDate == null || jMM.getTimeStamp().compareTo(newDate) > 0){
+				newDate = jMM.getTimeStamp();
+			} 
+
+		}
+
+		List<MetricMeasurement> returnResultsLatest = getMeasurementsByMetricAndDate(metric,newDate);
+		return returnResultsLatest;
+	}
+
+	/**
+	 * 
+	 * @param metric
+	 * @return
+	 * @throws uQasarException
+	 */
+	public List<MetricMeasurement> getMeasurementsByMetricAndDate(String metric, Date date) 
+			throws uQasarException {
+		logger.info("Get measurements for metric: " +metric);
+
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<MetricMeasurement> query = cb.createQuery(MetricMeasurement.class);
+		Root<MetricMeasurement> root = query.from(MetricMeasurement.class);
+		Predicate condition = cb.equal(root.get(MetricMeasurement_.metric), metric);
+		Predicate condition2 = cb.equal(root.get(MetricMeasurement_.timeStamp), date);
+		Predicate condition3 = cb.and(condition, condition2);
+		query.where(condition3);
+		query.orderBy(cb.desc(root.get(MetricMeasurement_.timeStamp)));
+		return em.createQuery(query).getResultList();
+	}
+	
+	/**
+	 * 
+	 * @param metric
+	 * @param date
+	 * @return
+	 * @throws uQasarException
+	 */
+	public int countMeasurementsByMetricAndDate(String metric, Date date) 
+			throws uQasarException {
+		logger.info("Count measurements for metric: " +metric + " and date: " +date);
+
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<MetricMeasurement> query = cb.createQuery(MetricMeasurement.class);
+		Root<MetricMeasurement> root = query.from(MetricMeasurement.class);
+		Predicate condition = cb.equal(root.get(MetricMeasurement_.metric), metric);
+		Predicate condition2 = cb.equal(root.get(MetricMeasurement_.timeStamp), date);
+		Predicate condition3 = cb.and(condition, condition2);
+		query.where(condition3);
+		query.orderBy(cb.desc(root.get(MetricMeasurement_.timeStamp)));
+		Integer res = em.createQuery(query).getResultList().size();
+		logger.info("Results' count: " +res);
+		return res;
+	}
+
+	/**
+	 * 
+	 * @param metric
+	 * @param date
+	 * @return
+	 * @throws uQasarException
+	 */
+	public int countMeasurementsPerProjectByMetricWithinPeriod(Project project, String metric, String period) 
+			throws uQasarException {
+		logger.info("Count measurements for metric: " +metric);
+
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<MetricMeasurement> query = cb.createQuery(MetricMeasurement.class);
+		Root<MetricMeasurement> root = query.from(MetricMeasurement.class);
+		Predicate condition1 = cb.equal(root.get(MetricMeasurement_.metric), metric);
+		Predicate condition2 = cb.equal(root.get(MetricMeasurement_.project), project);
+
+		Date from = getDateForPeriod(period);		
+		Date to = DateTime.now().toDate();
+		Predicate condition3 = cb.between(root.get(MetricMeasurement_.timeStamp), from, to);
+		Predicate condition4 = cb.and(condition1, condition2, condition3);
+		query.where(condition4);
+		query.orderBy(cb.desc(root.get(MetricMeasurement_.timeStamp)));
+		Integer res = em.createQuery(query).getResultList().size();
+		logger.info("Results' count: " +res);
+		return res;
+	}
+
+	/**
+	 * 
+	 * @param metric
+	 * @param date
+	 * @return
+	 * @throws uQasarException
+	 */
+	public int countMeasurementsPerProjectByMetricWithLatestDate(Project project, String metric) 
+			throws uQasarException {
+		Integer res = getMeasurementsPerProjectByMetricWithLatestDate(project,metric).size();
+		logger.info("Results' count: " +res);
+		return res;
+	}
+	
+	/**
+	 * Obtain a metric value for a specific metric source and metric type (and possibly a project) 
+	 * @param metricSource
+	 * @param metricType
+	 * @param project
+	 * @return stored metric value or null if no value exists
+	 */
+	public Float getMetricValue(MetricSource metricSource, String metricType, Project project) {
+
+		// The value to be stored
+		Float storedMetricValue = (float) 0;
+		
+		MetricMeasurement res = getLatestMeasurementByProjectAndMetric(project, metricType);
+		if (res != null) {
+			storedMetricValue = Float.valueOf(res.getValue());
+		} 
+
+		return storedMetricValue;
+	}
+
 	
 	/**
 	 *  Check if the connection to the provided URL is possible within the provided timeout

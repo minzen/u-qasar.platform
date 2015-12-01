@@ -116,8 +116,8 @@ public class AdapterDataManagementPage extends BasePage {
 				item.add(new Label("name", new PropertyModel<String>(
 						metricMeasurement, "name")));
 
-				item.add(new Label("metric", new PropertyModel<String>(
-						metricMeasurement, "metric")));
+				item.add(new Label("metricType", new PropertyModel<String>(
+						metricMeasurement, "metricType")));
 
 				item.add(new Label("value", new PropertyModel<String>(
 						metricMeasurement, "value")));

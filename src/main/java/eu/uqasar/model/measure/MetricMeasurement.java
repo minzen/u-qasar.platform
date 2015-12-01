@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -24,23 +25,31 @@ import eu.uqasar.model.tree.Project;
 @XmlRootElement
 @Table(name = "metricmeasurement")
 @Indexed
-public class MetricMeasurement extends AbstractEntity implements
-		IMetricMeasurement {
+public class MetricMeasurement extends AbstractEntity implements IMetricMeasurement {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
+	// Measurement name
 	private String name;
-	private String metric;
+	// Metric source: TestingFramework, IssueTracker, StaticAnalysis, ContinuousIntegration, 
+	// CubeAnalysis, VersionControl, Manual
+	private MetricSource metricSource;
+	// Metric type
+	private String metricType;
+	// Value of the metric
 	@Lob
 	private String value;
-	@ManyToOne(fetch = FetchType.LAZY)
 	// To which adapter the measurement belongs
-	private AdapterSettings adapter; 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
+	private AdapterSettings adapter;
+	// To which U-QASAR project the measurement belongs 
+    @ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "project_id", nullable = true)
 	private Project project;
+	// Timestamp 
 	private Date timeStamp;
 	// Extra content that is desired to be stored
 	@Lob
@@ -56,14 +65,22 @@ public class MetricMeasurement extends AbstractEntity implements
 		this.name = name;
 	}
 
-	@Override
-	public String getMetric() {
-		return metric;
+	public MetricSource getMetricSource() {
+		return metricSource;
+	}
+
+	public void setMetricSource(MetricSource metricSource) {
+		this.metricSource = metricSource;
 	}
 
 	@Override
-	public void setMetric(String metric) {
-		this.metric = metric;
+	public String getMetricType() {
+		return metricType;
+	}
+
+	@Override
+	public void setMetricType(String metricType) {
+		this.metricType = metricType;
 	}
 
 	@Override
@@ -118,7 +135,7 @@ public class MetricMeasurement extends AbstractEntity implements
 	@Override
 	public String toString() {
 		return "MetricMeasurement [name=" +this.name
-				+", metric=" +this.metric  
+				+", metric=" +this.metricType  
 				+", value=" +this.value
 				+", adapter=" +this.adapter
 				+", project=" +this.project

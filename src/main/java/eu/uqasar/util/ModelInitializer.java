@@ -31,7 +31,6 @@ import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,14 +61,11 @@ import org.jboss.weld.context.http.Http;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
-import eu.uqasar.model.analytic.Analysis;
-import eu.uqasar.model.analytic.Dimensions;
 import eu.uqasar.model.company.Company;
 import eu.uqasar.model.lifecycle.LifeCycleStage;
 import eu.uqasar.model.lifecycle.RupStage;
 import eu.uqasar.model.measure.MetricSource;
 import eu.uqasar.model.measure.Scale;
-import eu.uqasar.model.measure.TestLinkMetricMeasurement;
 import eu.uqasar.model.measure.Unit;
 import eu.uqasar.model.meta.ContinuousIntegrationTool;
 import eu.uqasar.model.meta.CustomerType;
@@ -100,11 +96,7 @@ import eu.uqasar.model.settings.adapter.AdapterSettings;
 import eu.uqasar.model.settings.mail.MailSettings;
 import eu.uqasar.model.settings.platform.PlatformSettings;
 import eu.uqasar.model.settings.qmodel.QModelSettings;
-import eu.uqasar.model.tree.Metric;
 import eu.uqasar.model.tree.Project;
-import eu.uqasar.model.tree.QualityIndicator;
-import eu.uqasar.model.tree.QualityObjective;
-import eu.uqasar.model.tree.Threshold;
 import eu.uqasar.model.user.Gender;
 import eu.uqasar.model.user.RegistrationStatus;
 import eu.uqasar.model.user.Team;
@@ -117,10 +109,6 @@ import eu.uqasar.service.ProductService;
 import eu.uqasar.service.QMTreeNodeService;
 import eu.uqasar.service.company.CompanyService;
 import eu.uqasar.service.dataadapter.AdapterSettingsService;
-import eu.uqasar.service.dataadapter.JenkinsDataService;
-import eu.uqasar.service.dataadapter.JiraDataService;
-import eu.uqasar.service.dataadapter.SonarDataService;
-import eu.uqasar.service.dataadapter.TestLinkDataService;
 import eu.uqasar.service.meta.IssueTrackingToolService;
 import eu.uqasar.service.meta.MetaDataService;
 import eu.uqasar.service.meta.ProgrammingLanguageService;
@@ -193,15 +181,6 @@ public class ModelInitializer implements Serializable {
     private MailSettingsService mailSettingsService;
 
     @Inject
-    private SonarDataService sonarDataService;
-
-    @Inject
-    private JiraDataService jiraDataService;
-
-    @Inject
-    private TestLinkDataService testLinkDataService;
-
-    @Inject
     private AdapterSettingsService adapterSettingsService;
 
     @Inject
@@ -235,8 +214,6 @@ public class ModelInitializer implements Serializable {
     @Inject
     private PlatformSettingsService platformSettingsService;
     
-    @Inject
-    private JenkinsDataService jenkinsDataService;
     
     private static final String ddlKey = "hibernate.hbm2ddl.auto";
     private static final String create = "create";
@@ -276,7 +253,7 @@ public class ModelInitializer implements Serializable {
             rulesTimer.initRules();
             
             // Initialize timer for fetching data by using the adapters
-            adapterSettingsService.initAdapterDataTimer();
+//            adapterSettingsService.initAdapterDataTimer();
             
         } catch (NoSuchAlgorithmException e) {
             logger.error(e.getMessage());
@@ -332,7 +309,7 @@ public class ModelInitializer implements Serializable {
         User[] users = createUsers(companies);
         createTeams(users);
         // TODO: Enable creation of a sample QA project if needed. 
-//        createProjects();
+        createProjects();
         createQModels(companies);
         createProducts();
         createProcesses();
@@ -516,6 +493,62 @@ public class ModelInitializer implements Serializable {
         Project project1 = new Project("Test Project", "Test");
         project1.setDescription("Sample QA project for U-QASAR platform");
        
+        List<AdapterSettings> adapterSettings = new ArrayList<>();
+        
+        AdapterSettings s = new AdapterSettings();
+        s.setName("Sonar");
+        s.setUrl("http://sonar.atb-bremen.de/");
+        s.setAdapterUsername("admin");
+        s.setAdapterPassword("3AKiAKgQWcy4yU");
+        s.setMetricSource(MetricSource.StaticAnalysis);
+        s.setAdapterProject("ProSEco");
+        s.setProject(project1);
+        adapterSettings.add(s);
+        
+        AdapterSettings j = new AdapterSettings();
+        j.setName("Jira");
+        j.setUrl("https://jira.atb-bremen.de/");
+        j.setAdapterUsername("nyrhinen");
+        j.setAdapterPassword("Npptv10Ma3j");
+        j.setMetricSource(MetricSource.IssueTracker);
+        j.setProject(project1);
+        adapterSettings.add(j);
+        
+        AdapterSettings testLinkSettings = new AdapterSettings();
+        testLinkSettings.setName("U-QASAR TestLink-Adapter");
+        testLinkSettings.setAdapterUsername("");
+//        testLinkSettings.setAdapterPassword("b69c8046cf60d2c109fb7bcd36d79af0f7529a4e28c58e7cec5b39d1f3230163");
+        testLinkSettings.setAdapterPassword("89eae19d63d69fe06d3179fa1409b03a");
+        testLinkSettings.setMetricSource(MetricSource.TestingFramework);
+        testLinkSettings.setUrl("http://localhost:8880/testlink/lib/api/xmlrpc/v1/xmlrpc.php");
+        testLinkSettings.setAdapterProject("U-QASAR");
+        testLinkSettings.setAdapterTestPlan("Early Prototype");
+        testLinkSettings.setProject(project1);
+        adapterSettings.add(testLinkSettings);
+        
+        AdapterSettings cubesSettings = new AdapterSettings();
+        cubesSettings.setName("U-QASAR Cubes-Adapter");
+        cubesSettings.setAdapterUsername("null");
+        cubesSettings.setAdapterPassword("null");
+        cubesSettings.setMetricSource(MetricSource.CubeAnalysis);
+        cubesSettings.setUrl("http://uqasar.pythonanywhere.com");
+        cubesSettings.setAdapterProject("jira");
+        cubesSettings.setProject(project1);
+        adapterSettings.add(cubesSettings);
+
+        
+        AdapterSettings jenkinsSettings = new AdapterSettings();
+        jenkinsSettings.setName("U-QASAR Jenkins-Adapter");
+        jenkinsSettings.setAdapterUsername("jenkins");
+        jenkinsSettings.setAdapterPassword("!jenkins!");
+        jenkinsSettings.setMetricSource(MetricSource.ContinuousIntegration);
+        jenkinsSettings.setUrl("http://dev.uqasar.eu/jenkins/job/uqasar/");
+        jenkinsSettings.setProject(project1);
+        adapterSettings.add(jenkinsSettings);
+        
+		project1.setAdapterSettings(adapterSettings);
+        treeNodeService.create(project1);
+		
         return new Project[]{project1};
     }
 

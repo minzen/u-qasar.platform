@@ -53,7 +53,7 @@ import com.googlecode.wickedcharts.highcharts.options.functions.PercentageFormat
 import com.googlecode.wickedcharts.highcharts.options.series.Point;
 import com.googlecode.wickedcharts.highcharts.options.series.PointSeries;
 
-import eu.uqasar.model.measure.ReportMeasurement;
+import eu.uqasar.model.measure.MetricMeasurement;
 import eu.uqasar.util.reporting.Util;
 
 public class ReportingWidget extends AbstractWidget {
@@ -130,9 +130,9 @@ public class ReportingWidget extends AbstractWidget {
      * 
      * @return
      */
-    public List<ReportMeasurement> getMeasurements(String cube, String additionalUrlToLoad) {
+    public List<MetricMeasurement> getMeasurements(String cube, String additionalUrlToLoad) {
 
-        List<ReportMeasurement> measurements = new ArrayList<ReportMeasurement>();
+        List<MetricMeasurement> measurements = new ArrayList<>();
 
         // generate cube Matrics
         if (cube != null) {
@@ -148,7 +148,7 @@ public class ReportingWidget extends AbstractWidget {
                     System.out.println("Exception during retrieval !");
 
                 } else {
-                    // finds the cells in the JSON response and returnds the Array of cells
+                    // finds the cells in the JSON response and returns the Array of cells
                     JSONArray cuberesponse_arr = cuberesponse.getJSONArray("cells");
 
                     System.out.println("cuberesponse as cuberesponse_arr:");
@@ -177,7 +177,7 @@ public class ReportingWidget extends AbstractWidget {
                         // for all individual JSON cells..
                         for (int i = 0; i < cuberesponse_arr.length(); i++) {
 
-                            ReportMeasurement rm = new ReportMeasurement();
+                            MetricMeasurement rm = new MetricMeasurement();
 
                             cube_table += "<tr>";
                             String factid = "";
@@ -204,9 +204,9 @@ public class ReportingWidget extends AbstractWidget {
 
                             if (factid != null) {
 
-                                rm.setReportType(reportType);
-                                rm.setReportValue(factid);
-                                rm.setCount(countID);
+//                                rm.setReportType(reportType);
+//                                rm.setReportValue(factid);
+//                                rm.setCount(countID);
                                 measurements.add(rm);
                             }
 
@@ -230,7 +230,7 @@ public class ReportingWidget extends AbstractWidget {
      * @param
      * @return
      */
-    public Options getChartOptions(List<ReportMeasurement> metrics, String chartType) {
+    public Options getChartOptions(List<MetricMeasurement> metrics, String chartType) {
 
         if (chartType.compareToIgnoreCase(SeriesType.COLUMN.toString()) == 0) {
             // ---------add COLUMN Chart ---------------
@@ -241,11 +241,11 @@ public class ReportingWidget extends AbstractWidget {
             Title chartTitle = new Title("Dynamic cubes query - COLUMN Chart View");
             options.setTitle(chartTitle);
 
-            for (ReportMeasurement metric : metrics) {
+            for (MetricMeasurement metric : metrics) {
                 PointSeries series = new PointSeries();
                 series.setType(seriesType);
-                series.addPoint(new Point(metric.getReportValue(), metric.getCount()));
-                series.setName(metric.getReportValue());
+//                series.addPoint(new Point(metric.getReportValue(), metric.getCount()));
+//                series.setName(metric.getReportValue());
                 options.addSeries(series);
             }
             options.setChartOptions(chartOptions);
@@ -272,9 +272,9 @@ public class ReportingWidget extends AbstractWidget {
             // Collect Points for Series
             List<Point> pointList = new LinkedList<Point>();
             List<String> names = new LinkedList<String>();
-            for (ReportMeasurement metric : metrics) {
-                pointList.add(new Point(metric.getReportValue(), metric.getCount()));
-                names.add(metric.getReportType());
+            for (MetricMeasurement metric : metrics) {
+//                pointList.add(new Point(metric.getReportValue(), metric.getCount()));
+  //              names.add(metric.getReportType());
             }
             // Add all those points to one series
             PointSeries series = new PointSeries();
